@@ -74,6 +74,10 @@ Do not translate Mermaid IDs, directives, class names, or edge syntax.
 - Search existing translations before introducing a technical term. If a new
   reusable terminology rule is needed, record the source term, preferred form,
   avoided form, and rationale in `../SKILL.md` in the same change.
+- For Persian developer lessons, make the globally conventional English term
+  primary on first use and put the Persian explanation in parentheses, for
+  example `benchmark (معیارسنجی)`. Do not make a Persian-only technical term
+  the primary searchable form.
 - Prefer natural target-language grammar over literal English syntax.
 - Preserve certainty, negation, comparison, scope, and causal meaning.
 - Avoid unexplained slang, promotional intensifiers, and added claims.

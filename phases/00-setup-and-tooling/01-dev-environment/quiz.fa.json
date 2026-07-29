@@ -2,24 +2,24 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "چرا پروژه‌های AI به یک محیط مجازی جداگانه نیاز دارند؟",
+      "question": "چرا پروژه‌های AI به یک virtual environment (محیط مجازی) جداگانه نیاز دارند؟",
       "options": [
-        "محیط‌های مجازی باعث می‌شوند کد سریع‌تر اجرا شود",
-        "وابستگی‌ها را جدا می‌کنند تا پروژه‌های مختلف با هم تداخل نداشته باشند",
-        "Python برای import کردن بسته‌ها به محیط مجازی نیاز دارد",
-        "محیط‌های مجازی دسترسی GPU فراهم می‌کنند"
+        "virtual environmentها باعث می‌شوند کد سریع‌تر اجرا شود",
+        "dependencyها را جدا می‌کنند تا پروژه‌های مختلف با هم تداخل نداشته باشند",
+        "Python برای import کردن packageها به virtual environment نیاز دارد",
+        "virtual environmentها دسترسی GPU فراهم می‌کنند"
       ],
       "correct": 1,
-      "explanation": "محیط‌های مجازی نسخهٔ بسته‌ها را به‌ازای هر پروژه جدا نگه می‌دارند. بدون آن‌ها، ارتقای PyTorch برای یک پروژه می‌تواند پروژهٔ دیگری را که به نسخهٔ قدیمی‌تر وابسته است از کار بیندازد."
+      "explanation": "virtual environmentها نسخهٔ packageها را به‌ازای هر پروژه جدا نگه می‌دارند. بدون آن‌ها، ارتقای PyTorch برای یک پروژه می‌تواند پروژهٔ دیگری را که به نسخهٔ قدیمی‌تر وابسته است از کار بیندازد."
     },
     {
       "stage": "pre",
       "question": "CUDA چه چیزی برای بارهای کاری AI فراهم می‌کند؟",
       "options": [
-        "یک مدیر بستهٔ Python برای کتابخانه‌های ML",
-        "یک فریم‌ورک وب برای استقرار مدل‌ها",
-        "محاسبات موازی روی GPUهای NVIDIA برای عملیات ماتریسی",
-        "یک runtime کانتینر برای سرویس‌دهی مدل"
+        "یک Python package manager (مدیر بستهٔ Python) برای کتابخانه‌های ML",
+        "یک web framework (فریم‌ورک وب) برای استقرار مدل‌ها",
+        "محاسبات موازی روی NVIDIA GPUها برای عملیات ماتریسی",
+        "یک container runtime (runtime کانتینر) برای سرویس‌دهی مدل"
       ],
       "correct": 2,
       "explanation": "CUDA سکوی محاسبات موازی NVIDIA است و به شما امکان می‌دهد عملیات ماتریسی را هم‌زمان روی هزاران هستهٔ GPU اجرا کنید. PyTorch و TensorFlow در پشت صحنه از آن استفاده می‌کنند."
@@ -28,25 +28,25 @@
       "stage": "post",
       "question": "در پشتهٔ چهارلایهٔ محیط، کدام لایه باید نخست نصب شود؟",
       "options": [
-        "کتابخانه‌های AI/ML (PyTorch، JAX)",
-        "مدیران بسته (pip، npm، cargo)",
-        "runtimeهای زبان (Python، Node.js)",
-        "زیربنای سیستم (OS، shell، درایورهای GPU)"
+        "AI/ML libraries (کتابخانه‌های AI/ML) (PyTorch، JAX)",
+        "package managerها (مدیران بسته) (pip، npm، cargo)",
+        "language runtimeها (runtimeهای زبان) (Python، Node.js)",
+        "system foundation (زیربنای سیستم) (OS، shell، درایورهای GPU)"
       ],
       "correct": 3,
-      "explanation": "نصب را از پایین به بالا انجام می‌دهیم: نخست زیربنای سیستم (OS، درایورها)، سپس مدیران بسته، سپس runtimeهای زبان و در پایان کتابخانه‌های AI. هر لایه به لایهٔ زیر خود وابسته است."
+      "explanation": "نصب را از پایین به بالا انجام می‌دهیم: نخست system foundation (زیربنا)، سپس package managerها، سپس language runtimeها و در پایان AI libraries. هر لایه به لایهٔ زیر خود وابسته است."
     },
     {
       "stage": "post",
       "question": "کاربرد uv در یک پروژهٔ AI با Python چیست؟",
       "options": [
-        "یک ابزار پایش GPU",
-        "یک نصب‌کننده و حل‌کنندهٔ وابستگی فوق‌سریع برای بسته‌های Python",
-        "یک کتابخانهٔ مصورسازی شبکهٔ عصبی",
-        "یک کامپایلر CUDA برای کرنل‌های سفارشی"
+        "یک GPU monitoring tool (ابزار پایش GPU)",
+        "یک fast installer and dependency resolver (نصب‌کننده و حل‌کنندهٔ وابستگی سریع) برای Python packageها",
+        "یک neural-network visualization library (کتابخانهٔ مصورسازی شبکهٔ عصبی)",
+        "یک CUDA compiler (کامپایلر CUDA) برای کرنل‌های سفارشی"
       ],
       "correct": 1,
-      "explanation": "uv یک نصب‌کنندهٔ سریع بستهٔ Python است که با Rust نوشته شده است. جای pip را می‌گیرد و حل وابستگی و نصب را بسیار سریع‌تر انجام می‌دهد؛ غالباً 10 تا 100 برابر سریع‌تر."
+      "explanation": "uv یک fast Python package installer (نصب‌کنندهٔ سریع packageهای Python) است که با Rust نوشته شده است. جای pip را می‌گیرد و dependency resolution و نصب را بسیار سریع‌تر انجام می‌دهد؛ غالباً 10 تا 100 برابر سریع‌تر."
     },
     {
       "stage": "post",
@@ -58,7 +58,7 @@
         "python -c 'import gpu'"
       ],
       "correct": 2,
-      "explanation": "اگر PyTorch به GPUهای CUDA دسترسی داشته باشد، torch.cuda.is_available() مقدار True برمی‌گرداند. روی Apple Silicon از torch.backends.mps.is_available() برای Metal Performance Shaders استفاده کنید."
+      "explanation": "اگر PyTorch به CUDA GPUها دسترسی داشته باشد، `torch.cuda.is_available()` مقدار True برمی‌گرداند. روی Apple Silicon از `torch.backends.mps.is_available()` برای Metal Performance Shaders استفاده کنید."
     }
   ]
 }

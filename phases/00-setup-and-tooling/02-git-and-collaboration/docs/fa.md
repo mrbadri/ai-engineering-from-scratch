@@ -1,6 +1,6 @@
 # Git و همکاری تیمی
 
-> کنترل نسخه اختیاری نیست. هر آزمایش، هر مدل و هر درسی که اینجا می‌سازید، ثبت و پیگیری می‌شود.
+> version control (کنترل نسخه) اختیاری نیست. هر آزمایش، هر مدل و هر درسی که اینجا می‌سازید، ثبت و پیگیری می‌شود.
 
 **Type:** یادگیری
 **Languages:** --
@@ -16,7 +16,7 @@
 
 ## مسئله
 
-قرار است در 20 فاز، صدها فایل کد بنویسید. بدون کنترل نسخه، کارتان را از دست می‌دهید، چیزهایی را خراب می‌کنید که امکان بازگرداندنشان را ندارید و راهی برای همکاری با دیگران نخواهید داشت.
+قرار است در 20 فاز، صدها فایل کد بنویسید. بدون version control، کارتان را از دست می‌دهید، چیزهایی را خراب می‌کنید که امکان بازگرداندنشان را ندارید و راهی برای همکاری با دیگران نخواهید داشت.
 
 Git ابزار این کار است. GitHub محل میزبانی کد است. این درس فقط چیزهایی را پوشش می‌دهد که برای این course لازم دارید.
 
@@ -50,7 +50,7 @@ git config --global user.name "Your Name"
 git config --global user.email "you@example.com"
 ```
 
-### گام 2: گردش‌کار روزانه
+### گام 2: daily workflow (گردش‌کار روزانه)
 
 ```bash
 git status
@@ -70,7 +70,7 @@ git checkout main
 git merge experiment/new-optimizer
 ```
 
-### گام 4: کار با مخزن این دوره
+### گام 4: کار با course repository (مخزن دوره)
 
 نمی‌توانید مستقیماً به course repository (مخزن دوره) push کنید — فقط maintainerها دسترسی نوشتن دارند. ابتدا آن را در GitHub fork کنید (دکمهٔ Fork در بالا سمت راست) تا `origin` به نسخهٔ خودتان اشاره کند:
 
@@ -89,11 +89,11 @@ git push origin my-progress
 
 | Command (فرمان)          | When (زمان استفاده)              |
 | ------------------------ | --------------------------------- |
-| `git clone`              | دریافت مخزن دوره                  |
-| `git add` + `git commit` | ذخیرهٔ کارتان                     |
-| `git push`               | پشتیبان‌گیری در GitHub            |
-| `git checkout -b`        | آزمایش کردن بدون خراب کردن `main` |
-| `git log --oneline`      | دیدن کارهایی که انجام داده‌اید    |
+| `git clone`              | Get course repository (دریافت مخزن دوره) |
+| `git add` + `git commit` | Save your work (ذخیرهٔ کارتان)         |
+| `git push`               | Back it up to GitHub (پشتیبان‌گیری در GitHub) |
+| `git checkout -b`        | Experiment without breaking `main` (آزمایش بدون خراب کردن `main`) |
+| `git log --oneline`      | See your history (دیدن تاریخچهٔ کارها) |
 
 همین است. برای این دوره به rebase، cherry-pick یا submodule نیاز ندارید.
 

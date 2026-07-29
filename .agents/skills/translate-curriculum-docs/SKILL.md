@@ -135,9 +135,9 @@ Write plain prose and let the browser handle direction. Specifically:
 
 When the target language is Persian (`fa`), optimize for readers who will
 search documentation and terminal output in English. Keep established tool and
-workflow nouns in English, or introduce a natural Persian equivalent followed
-by the English term on first use. Prefer these conventions consistently across
-lessons:
+workflow nouns in English. For a term that benefits from explanation, put the
+conventional English developer term first and the Persian meaning in
+parentheses on first use. Prefer these conventions consistently across lessons:
 
 | Concept | Preferred Persian rendering | Avoid |
 | --- | --- | --- |
@@ -150,6 +150,35 @@ lessons:
 | training-heavy | training-heavy (آموزش مدل سنگین) | سنگین از نظر آموزش |
 | benchmark | benchmark (معیارسنجی) | ترجمهٔ مبهمی مثل آزمون در متن سنجش کارایی |
 | speedup | speedup (افزایش سرعت) | حذف اصطلاح انگلیسی در گزارش عملکرد |
+| tensor operation | tensor operation (عملیات تانسور) | عملیات تانسور without the searchable English term |
+| verification script | verification script (اسکریپت بررسی) | اسکریپت بررسی when the artifact is a developer command |
+| GPU acceleration | GPU acceleration (شتاب‌دهی GPU) | شتاب‌دهی GPU without the searchable English term |
+| GPU backend | GPU backend (بک‌اند GPU) | بک‌اند GPU without the searchable English term |
+| training run | training run (اجرای آموزش) | اجرای آموزشی when referring to one model run |
+| local GPU / cloud GPU | local GPU (GPU محلی) / cloud GPU (GPU ابری) | GPU محلی or GPU ابری without the origin term on first use |
+| dataset | dataset (مجموعه‌داده) | مجموعه‌داده without the searchable English term |
+| notebook | notebook (نوت‌بوک) | دفترچه when referring to a computational notebook |
+| quick experiment | quick experiment (آزمایش سریع) | آزمایش سریع without the origin term on first use |
+| reproducible build | reproducible build (build قابل‌بازتولید) | ساخت بازتولیدپذیر when the build workflow is meant |
+| standard build | standard build (build معمولی) | ساخت ساده when referring to a package or binary build |
+| package | package (بسته) | بستهٔ نرم‌افزاری without the origin term on first use |
+| dependency resolver | dependency resolver (حل‌کنندهٔ وابستگی) | حل‌کنندهٔ وابستگی without the origin term |
+| Python package installer | Python package installer (نصب‌کنندهٔ packageهای Python) | نصب‌کنندهٔ بستهٔ Python without the origin term |
+| course repository | course repository (مخزن دوره) | مخزن دوره without the origin term on first use |
+| daily workflow | daily workflow (گردش‌کار روزانه) | گردش‌کار روزانه without the origin term on first use |
+| version control | version control (کنترل نسخه) | کنترل نسخه without the origin term on first use |
+| workflow | workflow (گردش‌کار) | گردش‌کار without the origin term on first use |
+| codebase | codebase (پایه‌کد) | کد مشترک when referring to a repository's codebase |
+| dependency | dependency (وابستگی) | وابستگی without the origin term on first use |
+| model checkpoint | model checkpoint (checkpoint مدل) | checkpoint مدل without the origin term on first use |
+| system RAM | system RAM (RAM سیستم) | RAM اصلی without the origin term on first use |
+| video memory | video memory (حافظهٔ ویدیویی) | حافظهٔ ویدیویی without the origin term on first use |
+| parallel computing platform | parallel computing platform (سکوی محاسبات موازی) | سکوی محاسبات موازی without the origin term |
+| half precision | half precision (دقت نیمه) | دقت نیمه without the origin term on first use |
+| command | command (فرمان) | فرمان when the command itself is the subject being taught |
+| flag | flag (پرچم) | پرچم without the origin term on first use |
+| switch | switch (سوئیچ) | سوئیچ without the origin term on first use |
+| rule of thumb | rule of thumb (قاعدهٔ سرانگشتی) | قاعدهٔ سرانگشتی without the origin term on first use |
 | maintainer, fork, clone, commit, push, checkpoint, snapshot | keep the English term in developer prose | forced literal translations that hide the searchable term |
 | branch | branch (شاخه) | شاخه without the searchable English term |
 | merge | merge (ادغام) | ادغام without the searchable English term |

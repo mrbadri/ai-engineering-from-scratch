@@ -12,7 +12,7 @@
 - toolchain (زنجیرهٔ ابزار) مربوط به Python 3.11+، Node.js 20+ و Rust را از ابتدا راه‌اندازی کنید
 - محیط‌های مجازی و package managerها (مدیران بسته) را برای reproducible buildها (buildهای قابل‌بازتولید) پیکربندی کنید
 - دسترسی GPU را با CUDA/MPS بررسی کنید و یک tensor operation (عملیات تانسور) آزمایشی اجرا کنید
-- پشتهٔ چهارلایهٔ system foundation (زیربنای سیستم)، packageها، language runtimeها و AI libraries را درک کنید
+- پشتهٔ چهارلایهٔ system foundation (زیربنای سیستم)، packageها (بسته‌ها)، language runtimeها و AI libraries (کتابخانه‌های AI) را درک کنید
 
 ## مسئله
 
@@ -80,7 +80,7 @@ print(f"Vector: {a}, dot product with itself: {np.dot(a, a)}")
 
 ### گام 3: Node.js با pnpm
 
-برای درس‌های TypeScript (ایجنت‌ها، سرورهای MCP، برنامه‌های وب).
+برای TypeScript lessonها (درس‌های TypeScript؛ ایجنت‌ها، سرورهای MCP و برنامه‌های وب).
 
 ```bash
 curl -fsSL https://fnm.vercel.app/install | bash
@@ -102,7 +102,7 @@ source ~/.zshrc
 
 ### گام 4: Rust
 
-برای درس‌های performance-critical (نیازمند کارایی بالا) (استنتاج، سیستم‌ها).
+برای درس‌های performance-critical (نیازمند کارایی بالا؛ استنتاج و سیستم‌ها).
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -113,7 +113,7 @@ cargo --version
 
 ### گام 5: Julia (اختیاری)
 
-برای درس‌های سنگین ریاضی که Julia در آن‌ها می‌درخشد.
+برای math-heavy lessonها (درس‌های سنگین ریاضی) که Julia در آن‌ها می‌درخشد.
 
 ```bash
 curl -fsSL https://install.julialang.org | sh
@@ -121,7 +121,7 @@ curl -fsSL https://install.julialang.org | sh
 julia -e 'println("Julia ", VERSION)'
 ```
 
-### گام 6: راه‌اندازی GPU (اگر دارید)
+### گام 6: GPU setup (راه‌اندازی GPU؛ اگر GPU دارید)
 
 **NVIDIA (Linux / Windows):**
 
@@ -173,7 +173,7 @@ python phases/00-setup-and-tooling/01-dev-environment/code/verify.py
 
 این درس یک verification script (اسکریپت بررسی) تولید می‌کند که هر کسی می‌تواند برای بررسی وضعیت محیط خود اجرا کند.
 
-برای prompt (درخواست/دستور)ای که به دستیارهای AI کمک می‌کند مشکلات محیط را عیب‌یابی کنند، `outputs/prompt-env-check.md` را ببینید.
+برای prompt (درخواست/دستور) که به دستیارهای AI کمک می‌کند مشکلات محیط را عیب‌یابی کنند، `outputs/prompt-env-check.md` را ببینید.
 
 ## تمرین‌ها
 

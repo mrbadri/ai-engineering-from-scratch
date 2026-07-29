@@ -33,9 +33,9 @@
 2. Google Colab (سطح رایگان)
    هزینه: $0
    setup: ندارد
-   مناسب برای: quick experimentهای (آزمایش‌های سریع)، وقتی در خانه GPU ندارید
+   مناسب برای: quick experimentها (آزمایش‌های سریع)، وقتی در خانه GPU ندارید
 
-3. cloud GPU (GPU ابری) (Lambda, RunPod, Vast.ai)
+3. cloud GPU (GPU ابری) — Lambda, RunPod, Vast.ai
    هزینه: $0.20-2.00/hr
    setup: SSH + نصب
    مناسب برای: serious training (آموزش جدی)، مدل‌های بزرگ
@@ -43,7 +43,7 @@
 
 ## آن را بسازید
 
-### گزینه 1: GPU محلی NVIDIA
+### گزینه 1: local NVIDIA GPU (GPU محلی NVIDIA)
 
 بررسی کنید local GPU دارید یا نه:
 
@@ -69,7 +69,7 @@ if torch.cuda.is_available():
 2. از مسیر `Runtime > Change runtime type > T4 GPU`، نوع runtime را به T4 GPU تغییر دهید
 3. برای بررسی، `!nvidia-smi` را اجرا کنید
 
-Notebookهای این دوره را مستقیماً در Colab بارگذاری کنید.
+notebookهای این دوره را مستقیماً در Colab بارگذاری کنید.
 
 ### گزینه 3: cloud GPU (GPU ابری)
 
