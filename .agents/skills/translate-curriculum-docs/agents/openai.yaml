@@ -1,0 +1,4 @@
+interface:
+  display_name: "Translate Curriculum Docs"
+  short_description: "Translate lessons without breaking technical content or the site layout"
+  default_prompt: "Use $translate-curriculum-docs to translate a lesson into my target language."

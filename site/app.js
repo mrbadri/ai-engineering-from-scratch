@@ -1,4 +1,12 @@
 (function () {
+  // i18n.js is loaded ahead of this file, but degrade gracefully if it is not
+  // (e.g. a stripped-down deploy) so the page still renders in English.
+  var i18n = window.AIFS_I18N || null;
+  function tr(key, vars) { return i18n ? i18n.t(key, vars) : key; }
+  function i18nUrl(href) { return i18n ? i18n.url(href) : href; }
+  function phaseLabel(p) { return i18n ? i18n.phaseLabel(p) : { name: p.name, desc: p.desc || '' }; }
+  function lessonName(l) { return i18n ? i18n.lessonName(l) : l.name; }
+
   var root = document.documentElement;
   var stored = localStorage.getItem('theme');
   if (stored) {
@@ -124,9 +132,10 @@
       var statusClass = p.status.replace(/ /g, '-');
       var roman = toRoman(p.id);
       var num = String(p.id).padStart(2, '0');
+      var label = phaseLabel(p);
       html += '<div class="toc-row" data-phase="' + i + '">';
       html += '<span class="toc-num">' + roman + '.</span>';
-      html += '<div><span class="toc-status ' + statusClass + '"></span><span class="toc-name">' + escapeHtml(p.name) + '</span></div>';
+      html += '<div><span class="toc-status ' + statusClass + '"></span><span class="toc-name">' + escapeHtml(label.name) + '</span></div>';
       html += '<span class="toc-meta">' + done + ' / ' + total + '</span>';
       html += '<span class="toc-meta">' + num + '</span>';
       html += '</div>';
@@ -195,7 +204,7 @@
     if (resetBtn) {
       resetBtn.addEventListener('click', function () {
         if (!window.AIFSProgress) return;
-        var ok = window.confirm('Clear all your local progress (quiz answers and completed lessons)? This cannot be undone.');
+        var ok = window.confirm(tr('modal.confirmReset'));
         if (!ok) return;
         window.AIFSProgress.reset();
       });
@@ -209,9 +218,11 @@
     if (!p) return;
     currentPhaseIdx = idx;
 
-    document.getElementById('modalPhaseNum').textContent = 'PHASE ' + String(p.id).padStart(2, '0');
-    document.getElementById('modalTitle').textContent = p.name;
-    document.getElementById('modalDesc').textContent = p.desc;
+    var label = phaseLabel(p);
+    document.getElementById('modalPhaseNum').textContent =
+      tr('modal.phase', { num: String(p.id).padStart(2, '0') });
+    document.getElementById('modalTitle').textContent = label.name;
+    document.getElementById('modalDesc').textContent = label.desc;
 
     renderModalLessons(p);
 
@@ -238,22 +249,28 @@
       if (userComplete) statusClass = 'complete';
 
       html += '<div class="modal-lesson' + (userComplete ? ' user-done' : '') + '">';
-      html += '<span class="modal-lesson-status ' + statusClass + '"' + (userComplete ? ' title="You completed this lesson"' : '') + '></span>';
+      html += '<span class="modal-lesson-status ' + statusClass + '"' + (userComplete ? ' title="' + escapeHtml(tr('modal.youCompleted')) + '"' : '') + '></span>';
+      var lessonTitle = escapeHtml(lessonName(l));
       if (l.url) {
-        html += '<a href="' + l.url + '" target="_blank" rel="noopener">' + escapeHtml(l.name) + '</a>';
+        html += '<a href="' + l.url + '" target="_blank" rel="noopener">' + lessonTitle + '</a>';
       } else {
-        html += '<a>' + escapeHtml(l.name) + '</a>';
+        html += '<a>' + lessonTitle + '</a>';
       }
-      html += '<span class="modal-lesson-type" data-type="' + escapeHtml(l.type) + '"' + (l.combines ? ' title="Combines: ' + escapeHtml(l.combines) + '"' : '') + '>' + escapeHtml(l.type) + '</span>';
+      var combinesTitle = l.combines
+        ? ' title="' + escapeHtml(tr('modal.combines', { list: l.combines })) + '"'
+        : '';
+      html += '<span class="modal-lesson-type" data-type="' + escapeHtml(l.type) + '"' + combinesTitle + '>' + escapeHtml(l.type) + '</span>';
       html += '<span class="modal-lesson-lang">' + escapeHtml(l.lang) + '</span>';
 
       var actionHtml = '';
       if ((l.status === 'complete' || userComplete) && lessonPath) {
-        actionHtml = '<a href="lesson.html?path=' + lessonPath + '" class="modal-lesson-read">' + (userComplete ? 'Review' : 'Read') + '</a>';
+        actionHtml = '<a href="' + i18nUrl('lesson.html?path=' + lessonPath) + '" class="modal-lesson-read">' +
+          escapeHtml(tr(userComplete ? 'modal.review' : 'modal.read')) + '</a>';
       }
       var toggleHtml = '';
       if (hasProgress && lessonPath) {
-        toggleHtml = '<button type="button" class="modal-lesson-toggle' + (userComplete ? ' done' : '') + '" data-path="' + lessonPath + '" title="' + (userComplete ? 'Mark as not done' : 'Mark complete') + '" aria-label="' + (userComplete ? 'Mark as not done' : 'Mark complete') + '">' + (userComplete ? '✓' : '+') + '</button>';
+        var toggleLabel = escapeHtml(tr(userComplete ? 'modal.markNotDone' : 'modal.markComplete'));
+        toggleHtml = '<button type="button" class="modal-lesson-toggle' + (userComplete ? ' done' : '') + '" data-path="' + lessonPath + '" title="' + toggleLabel + '" aria-label="' + toggleLabel + '">' + (userComplete ? '✓' : '+') + '</button>';
       }
       html += (actionHtml || '<span class="modal-lesson-read-placeholder" aria-hidden="true"></span>') + toggleHtml;
       html += '</div>';
@@ -283,7 +300,7 @@
       var pct = Math.round((userDone / p.lessons.length) * 100);
       if (progEl) {
         progEl.style.display = '';
-        progEl.innerHTML = '<span class="modal-progress-count">' + userDone + ' / ' + p.lessons.length + '</span> <span class="modal-progress-label">completed</span> <span class="modal-progress-pct">' + pct + '%</span>';
+        progEl.innerHTML = '<span class="modal-progress-count">' + userDone + ' / ' + p.lessons.length + '</span> <span class="modal-progress-label">' + escapeHtml(tr('modal.completed')) + '</span> <span class="modal-progress-pct">' + pct + '%</span>';
       }
       if (barEl && barFill) {
         barEl.style.display = '';

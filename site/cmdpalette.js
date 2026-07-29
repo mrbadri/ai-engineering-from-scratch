@@ -19,6 +19,11 @@
   var MAX_RESULTS = 12;
   var BODY_ATTR   = 'data-palette-open';
 
+  // ── i18n ─────────────────────────────────────────────────────────────
+  var i18n = window.AIFS_I18N || null;
+  function tr(key, vars) { return i18n ? i18n.t(key, vars) : key; }
+  function i18nUrl(href) { return i18n ? i18n.url(href) : href; }
+
   // ── Module state ─────────────────────────────────────────────────────
   var _index      = null;   // lazy-built flat array of searchable items
   var _activeIdx  = -1;
@@ -47,13 +52,22 @@
             if (m) lessonPath = m[1];
           }
 
+          // Search both the localized and the English title/summary, so a
+          // Persian reader can still find a lesson by its English name.
+          var localName    = i18n ? i18n.lessonName(lesson)    : lesson.name;
+          var localSummary = i18n ? i18n.lessonSummary(lesson) : lesson.summary;
+          var localPhase   = i18n ? i18n.phaseLabel(phase).name : phase.name;
+
           _index.push({
             kind:       'lesson',
             id:         'l:' + i + ':' + j,
             phaseId:    phase.id,
-            phaseName:  phase.name,
-            name:       lesson.name     || '',
-            summary:    lesson.summary  || '',
+            phaseName:  localPhase,
+            phaseNameEn: phase.name,
+            name:       localName       || '',
+            nameEn:     lesson.name     || '',
+            summary:    localSummary    || '',
+            summaryEn:  lesson.summary  || '',
             keywords:   lesson.keywords || '',
             type:       lesson.type     || '',
             lang:       lesson.lang     || '',
@@ -104,8 +118,11 @@
     // q is already lowercased + trimmed by the caller
     var name     = item.name.toLowerCase();
     var summary  = (item.summary  || '').toLowerCase();
-    var keywords = (item.keywords || '').toLowerCase();
-    var phase    = (item.phaseName || '').toLowerCase();
+    // Aliases: the English source strings, appended so a localized index stays
+    // searchable in English without affecting how results are displayed.
+    var keywords = ((item.keywords || '') + ' ' + (item.nameEn || '') + ' ' +
+      (item.summaryEn || '')).toLowerCase();
+    var phase    = ((item.phaseName || '') + ' ' + (item.phaseNameEn || '')).toLowerCase();
     var lang     = (item.lang  || '').toLowerCase();
     var type     = (item.type  || '').toLowerCase();
     var says     = (item.says  || '').toLowerCase();
@@ -230,7 +247,7 @@
     el.id = PALETTE_ID;
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
-    el.setAttribute('aria-label', 'Search lessons and glossary');
+    el.setAttribute('aria-label', tr('cp.aria.dialog'));
 
     el.innerHTML =
       '<div class="cp-backdrop" id="cpBackdrop"></div>' +
@@ -243,27 +260,27 @@
             '<line x1="21" y1="21" x2="16.65" y2="16.65"/>' +
           '</svg>' +
           '<input class="cp-input" id="cpInput" type="search"' +
-          ' placeholder="Search lessons and glossary…"' +
+          ' placeholder="' + escHtml(tr('cp.placeholder')) + '"' +
           ' autocomplete="off" autocorrect="off"' +
           ' autocapitalize="off" spellcheck="false"' +
-          ' aria-label="Search" aria-autocomplete="list"' +
+          ' aria-label="' + escHtml(tr('cp.aria.input')) + '" aria-autocomplete="list"' +
           ' aria-controls="cpResults">' +
-          '<kbd class="cp-kbd-esc" id="cpKbdEsc">Esc</kbd>' +
+          '<kbd class="cp-kbd-esc" id="cpKbdEsc">' + escHtml(tr('cp.esc')) + '</kbd>' +
         '</div>' +
         '<ul class="cp-results" id="cpResults"' +
-        ' role="listbox" aria-label="Search results"></ul>' +
+        ' role="listbox" aria-label="' + escHtml(tr('cp.aria.results')) + '"></ul>' +
         '<div class="cp-footer">' +
           '<span class="cp-footer-group">' +
             '<kbd>↑</kbd><kbd>↓</kbd>' +
-            '<span class="cp-footer-label">navigate</span>' +
+            '<span class="cp-footer-label">' + escHtml(tr('cp.navigate')) + '</span>' +
           '</span>' +
           '<span class="cp-footer-group">' +
             '<kbd>↵</kbd>' +
-            '<span class="cp-footer-label">open</span>' +
+            '<span class="cp-footer-label">' + escHtml(tr('cp.open')) + '</span>' +
           '</span>' +
           '<span class="cp-footer-group">' +
             '<kbd>Esc</kbd>' +
-            '<span class="cp-footer-label">close</span>' +
+            '<span class="cp-footer-label">' + escHtml(tr('cp.close')) + '</span>' +
           '</span>' +
           '<span class="cp-footer-shortcut">' + shortcutLabel + '</span>' +
         '</div>' +
@@ -344,7 +361,7 @@
     if (!query) {
       list.innerHTML =
         '<li class="cp-empty" role="option" aria-disabled="true">' +
-        'Type to search 503 lessons, 499 outputs, and glossary terms' +
+        escHtml(tr('cp.hint')) +
         '</li>';
       _activeIdx = -1;
       return;
@@ -353,7 +370,7 @@
     if (results.length === 0) {
       list.innerHTML =
         '<li class="cp-empty" role="option" aria-disabled="true">' +
-        'No results for <em>' + escHtml(query) + '</em>' +
+        tr('cp.noResults_html', { query: escHtml(query) }) +
         '</li>';
       _activeIdx = -1;
       return;
@@ -369,13 +386,13 @@
       if (r.kind === 'lesson') {
         // Prefer the in-site reader; fall back to GitHub URL
         dest = r.lessonPath
-          ? 'lesson.html?path=' + encodeURIComponent(r.lessonPath)
+          ? i18nUrl('lesson.html?path=' + encodeURIComponent(r.lessonPath))
           : r.url;
-        chip = 'Phase ' + String(r.phaseId).padStart(2, '0');
+        chip = tr('cp.chip.phase', { num: String(r.phaseId).padStart(2, '0') });
       } else if (r.kind === 'artifact') {
         // Jump to the lesson that produced this artifact
         dest = r.lessonPath
-          ? 'lesson.html?path=' + encodeURIComponent(r.lessonPath)
+          ? i18nUrl('lesson.html?path=' + encodeURIComponent(r.lessonPath))
           : ('https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/' + r.file);
         var ak = (r.artKind || 'artifact');
         chip = ak.charAt(0).toUpperCase() + ak.slice(1);
@@ -383,8 +400,8 @@
       } else {
         // Deep-link: pre-populate glossary search with the exact term name
         // so the user lands directly on the definition, not the full list.
-        dest      = 'glossary.html?q=' + encodeURIComponent(r.name);
-        chip      = 'Glossary';
+        dest      = i18nUrl('glossary.html?q=' + encodeURIComponent(r.name));
+        chip      = tr('cp.chip.glossary');
         chipClass += ' cp-item-chip--alt';
       }
 
@@ -395,7 +412,7 @@
         if (r.lang && r.lang !== '—') metaParts.push(r.lang);
       } else if (r.kind === 'artifact') {
         if (r.phaseId !== undefined && r.phaseId !== null) {
-          metaParts.push('Phase ' + String(r.phaseId).padStart(2, '0'));
+          metaParts.push(tr('cp.chip.phase', { num: String(r.phaseId).padStart(2, '0') }));
         }
       }
       var meta = metaParts.join(' · '); // ·

@@ -44,6 +44,7 @@ scripts/                      # automation
 5. **Original implementations only.** Don't cite external curriculum repos in docs, code comments, or commit text. Cite RFCs, official specs, and academic papers when they are the canonical source.
 6. **Dependency allowlist** (see `Dependencies` below). Stdlib-first.
 7. **Never commit generated files**: `catalog.json` is gitignored, `site/data.js` is rebuilt by CI, `package-lock.json` is never tracked.
+8. **Translation terminology is cumulative.** When translating or reviewing `docs/<lang>.md`, any reusable terminology or translation pattern discovered must be recorded in `.agents/skills/translate-curriculum-docs/SKILL.md` before the work is finished.
 
 ---
 
@@ -79,6 +80,30 @@ If a finding suggests a banned dep, skip it with the reason "stays stdlib-first 
 ```
 
 The `**Languages:**` field must match the languages with a `main.*` file in `code/`.
+
+## Translation consistency contract
+
+The translation skill is the canonical place for decisions that affect more
+than one lesson. Agents working on translated lesson Markdown must follow this
+feedback loop:
+
+1. Read `.agents/skills/translate-curriculum-docs/SKILL.md` and its required
+   references before editing a translation.
+2. Search the existing translations for the technical term or phrase before
+   choosing a new rendering. Keep established wording unless there is a clear
+   developer-readability problem.
+3. If the review reveals a reusable term, ambiguity, or recurring pattern that
+   is not already documented, update the skill in the same change. Add the
+   source term, preferred rendering, avoided rendering, and a short reason.
+4. Apply the new rule consistently to every lesson in the requested scope.
+   Do not leave a terminology decision only in one Markdown file.
+5. Run the translation skill's structural checks, `node site/build.js`,
+   `python3 scripts/audit_lessons.py`, and `git diff --check` after updating
+   the skill and lesson files.
+
+This rule is mandatory for translation work. A translation change is
+incomplete if it introduces a reusable terminology decision without recording
+that decision in the skill.
 
 ### quiz.json schema
 
@@ -215,4 +240,4 @@ gh pr create --title "feat(phase-NN/MM): add <slug>" --body "<5-line summary>"
 
 ---
 
-Last reviewed: 2026-05-27.
+Last reviewed: 2026-07-29.

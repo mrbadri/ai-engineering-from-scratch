@@ -1,0 +1,589 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   RTL + per-language overrides
+   ─────────────────────────────────────────────────────────────────────
+   Loaded on every page, after style.css. Two kinds of rule live here:
+
+     html[dir="rtl"]      layout mirroring — applies to any RTL language
+     html[data-lang="fa"] Persian-specific typography and CSS-generated text
+
+   Every selector is prefixed with the html[...] attribute selector, which
+   raises specificity above the base rules (including the per-page <style>
+   blocks in lesson.html and index.html). That means this file wins no
+   matter where it sits in the cascade, and LTR rendering is untouched.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Type stack ────────────────────────────────────────────────────────
+   Peyda is self-hosted so Persian text renders consistently without a
+   third-party font request. Code retains JetBrains Mono via --font-code. */
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-Thin.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-ExtraLight.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-Light.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-Medium.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-SemiBold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-Bold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-ExtraBold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Peyda';
+  src: url('assets/fonts/peyda-fa-num/PeydaWebFaNum-Black.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
+html[data-lang="fa"] {
+  --font-body: 'Peyda', 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  --font-display: 'Peyda', 'VT323', ui-monospace, monospace;
+  --font-heading: var(--font-display);
+
+  /* --font-mono does double duty in this design: real code, and the small
+     tracked-out labels ("LEARNING OBJECTIVES", "PHASE 01", nav items). For a
+     Persian label, glyph-level fallback is not enough — the letters come from
+     Peyda but the *space* still comes from JetBrains Mono, which is a wide
+     monospace advance, so every word gap opens up. Point --font-mono at
+     Peyda for labels and keep a separate stack for anything that is
+     actually code. */
+  --font-mono: 'Peyda', 'JetBrains Mono', ui-monospace, 'Consolas', monospace;
+  --font-code: 'JetBrains Mono', ui-monospace, 'Consolas', monospace;
+}
+
+/* Arabic script is cursive: letters join. Any positive letter-spacing breaks
+   the joins and renders each word as disconnected shapes, so the tracking
+   used throughout the Latin design has to be neutralised.
+   !important is deliberate here: the tracking is set from dozens of rules
+   across style.css and two page-level <style> blocks at varying specificity,
+   and a single miss produces unreadable Persian rather than a cosmetic
+   difference. Code faces (code/pre/kbd/samp) are excluded on purpose — their
+   contents are Latin and keep their intended tracking. */
+html[data-lang="fa"] :is(h1, h2, h3, h4, h5, h6, p, li, a, span, div, td, th,
+  button, label, summary, figcaption, input, select, option, blockquote) {
+  letter-spacing: normal !important;
+}
+
+/* ─── Vertical rhythm ───────────────────────────────────────────────────
+   The Latin design is set for VT323 and Source Serif: display type at
+   line-height 0.86-1, body copy at 1.6-1.7. Neither transfers to Arabic
+   script, which sits on a taller body, carries deep descenders (ی ج چ) and
+   optional marks above, and has no lower-case x-height to hide behind.
+
+   Headings need *more* than the Latin value or the descenders clip; body copy
+   needs more again or consecutive lines collide and the block reads as a grey
+   mass. Those are two different corrections, so they are two rules — a single
+   blanket 1.35 made the two-line masthead title fall apart into two
+   unconnected lines. */
+
+/* Headings: room for descenders, still tight enough to read as one unit. */
+html[data-lang="fa"] :is(h2, h3, h4, .toc-name, .modal-title, .ai-panel-title,
+  .lesson-article h2, .detail-title, .lesson-error h2, .lab-challenge h2) {
+  line-height: 1.3;
+}
+
+/* Display type stays near 1.1: at this size the descenders clear anyway, and
+   anything looser stops reading as a single title. */
+html[data-lang="fa"] :is(h1, .lesson-article h1) {
+  line-height: 1.15;
+}
+
+/* Peyda is also wider per character than VT323, so the fluid maximum comes
+   down to keep the masthead from dominating the viewport. */
+html[data-lang="fa"] .manual-title {
+  font-size: clamp(2.6rem, 8.5vw, 5.5rem);
+  line-height: 1.12;
+}
+
+/* Body copy and anything prose-like.
+   `p` and `li` are listed explicitly, not just their containers: style.css sets
+   `p { line-height: 1.62 }` on the element itself, and a rule that matches the
+   child directly always beats a value inherited from the parent — so setting
+   the container alone left every paragraph on the Latin rhythm. */
+html[data-lang="fa"] :is(p, li, dd, dt, figcaption,
+  .manual-tagline, .manual-attribution, .preface-body,
+  .toc-subtitle, .colophon-grid, .book-card p, .modal-desc, .detail-desc,
+  .about p, .about ul, .about li, .about .lede, .glossary-col-says,
+  .glossary-col-means, .output-desc, .quiz-question-text, .quiz-explanation,
+  .learning-objectives li, .lesson-article p, .lesson-article ul li,
+  .lesson-article ol li, .lesson-article .motto, .lesson-article blockquote,
+  .lesson-article td, .lesson-article th) {
+  line-height: 1.95;
+}
+
+/* Latin-only hyphenation rules do not apply to Persian. */
+html[data-lang="fa"] body {
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+/* CSS-generated labels, fed by i18n.js custom properties. Scoped to the same
+   breakpoint as the rules they override — style.css only draws these
+   pseudo-element labels in the ≤600px card layout, so overriding them outside
+   the media query would print the text next to the +/✓ at every width. */
+@media (max-width: 600px) {
+  html[data-lang="fa"] .modal-lesson-toggle::after { content: var(--i18n-mark, "Mark"); }
+  html[data-lang="fa"] .modal-lesson-toggle.done::after { content: var(--i18n-done, "Done"); }
+}
+
+/* ─── LTR islands ───────────────────────────────────────────────────────
+   Code, commands and identifiers must keep their own reading order even
+   inside an RTL paragraph. `unicode-bidi: isolate` stops the surrounding
+   Persian run from reordering the span's contents — without it, an inline
+   `pip install x` lands on screen in the wrong order. */
+html[dir="rtl"] :where(code, pre, kbd, samp, .code-lang, .code-card-run,
+  .code-card-name, .code-lang-icon, .output-card-name, .output-install-hint,
+  .colophon-cmd, .cp-item-meta, .catalog-lang, .modal-lesson-lang,
+  .masthead-btn-count, .header-github .star-count, .book-card .vol,
+  .book-card .dl a, .quiz-option .opt-letter, .quiz-option .quiz-marker,
+  .li-num, .node-id,
+  /* Numeric fractions and Latin-only chips: "0 / 12" is bidi-neutral apart
+     from the digit runs, so an RTL paragraph would render it as "12 / 0". */
+  .modal-progress-count, .modal-progress-pct, .stat-row-value, .toc-meta,
+  .quiz-score-number, .modal-lesson-type, .catalog-phase-label,
+  .timeline-ellipsis) {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+html[dir="rtl"] :where(pre, pre code, .code-card-run, .colophon-cmd,
+  .output-install-hint) {
+  text-align: left;
+}
+
+/* Code and identifiers keep the monospace face.
+   That is also what keeps their digits in ASCII: the self-hosted Peyda build is
+   the "FaNum" variant, which substitutes Persian-Indic digits for ASCII ones.
+   Correct for prose, wrong for a version string, a file path, or a username —
+   so anything whose digits are part of an identifier is pinned to --font-code.
+   Interface *metrics* are deliberately not in this list; see below. */
+html[data-lang="fa"] :is(code, pre, kbd, samp, .code-lang, .code-card-run,
+  .code-card-name, .code-lang-icon, .output-card-name, .output-install-hint,
+  .colophon-cmd, .catalog-lang, .modal-lesson-lang, .book-card .vol,
+  .cp-footer kbd, .cp-kbd-esc, .quiz-option .opt-letter,
+  .quiz-option .quiz-marker, .li-num, .code-card-size, .i18n-id,
+  /* Roman numerals: Latin letterforms, not numbers to be localized. */
+  .toc-num) {
+  font-family: var(--font-code);
+}
+
+/* Roman numerals are deliberately NOT forced to direction: ltr.
+   "II." is a strong left-to-right letter run followed by a bidi-neutral period.
+   The letters keep their own order either way, but forcing the element to LTR
+   also pins the period to the right of them — so in a right-to-left row, where
+   the numeral is the first thing you read, the dot arrives before the number.
+   Left to inherit the page direction, the neutral period resolves to RTL and
+   moves to the left of the numeral, which is where a reader expects the
+   separator to be. The face is still pinned to --font-code below so the glyphs
+   stay Latin letterforms. */
+
+/* Interface metrics — lesson counts, progress fractions, scores, phase chips.
+   These are numbers a Persian reader reads as numbers, so they take the body
+   face and pick up its Persian digits, matching the surrounding prose. They
+   stay LTR-isolated above so "12 / 12" keeps its order. */
+html[data-lang="fa"] :is(.toc-meta, .stat-row-value, .modal-progress-count,
+  .modal-progress-pct, .quiz-score-number, .catalog-phase-label,
+  .masthead-btn-count, .header-github .star-count, .timeline-ellipsis,
+  .modal-lesson-type) {
+  font-family: var(--font-body);
+}
+
+/* Identifiers embedded in translated strings: handles, versions, figure codes,
+   example paths. Marked up as <span class="i18n-id"> in i18n-strings.js so a
+   single class carries both the ASCII digits and the LTR isolation. */
+html[dir="rtl"] .i18n-id {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Content that may still be English even on a translated page: quiz banks
+   without a translation, GitHub file listings, lesson titles awaiting
+   translation. `plaintext` resolves each element's direction from its own
+   first strong character, so an English sentence keeps its question mark and
+   leading number in the right place instead of having them flipped to the
+   far edge by the RTL paragraph direction. */
+html[dir="rtl"] :is(.quiz-question-text, .quiz-explanation, .quiz-score-label,
+  .quiz-option > span:last-child, .quiz-deeper, .output-desc, .code-card-size,
+  .lesson-contract-field, .glossary-col-says, .glossary-col-means,
+  .detail-desc, .modal-desc, .cp-item-summary) {
+  unicode-bidi: plaintext;
+}
+
+/* ─── Reading direction of prose ────────────────────────────────────────
+   The Latin design justifies body copy. Browsers do not implement kashida
+   justification for Arabic script, so justified Persian opens ragged word
+   gaps instead. Ranged-right (start-aligned) is the correct default. */
+html[dir="rtl"] :is(.lesson-article p, .preface-body, .lesson-article ul li,
+  .lesson-article ol li, .lesson-article .motto, .lesson-article blockquote,
+  .learning-objectives li, .output-desc,
+  .phase-progress-text, .panel-fallback, .lesson-error, .section-title,
+  .lesson-article thead th, .catalog-table th) {
+  text-align: right;
+}
+
+/* Quiz text is deliberately NOT force-aligned right.
+   Individual answers are often English, or literally code
+   ("import torch; print(torch.cuda.is_available())", "git add, git commit").
+   Combined with the `unicode-bidi: plaintext` rule above, `text-align: start` resolves
+   per element against the direction the bidi algorithm derives from that
+   element's own first strong character — so a Persian answer is RTL and
+   right-aligned, an English or code answer is LTR and left-aligned, with no
+   per-answer markup. `start` is required rather than simply omitted because
+   lesson.html sets `.quiz-option { text-align: left }` for the Latin design. */
+html[dir="rtl"] :is(.quiz-question-text, .quiz-option,
+  .quiz-option > span:last-child, .quiz-explanation, .quiz-score-label) {
+  text-align: start;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Shared chrome (style.css)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html[dir="rtl"] .skip-link { left: auto; right: -9999px; }
+html[dir="rtl"] .skip-link:focus,
+html[dir="rtl"] .skip-link:focus-visible { left: auto; right: 16px; }
+
+/* Drop caps: ::first-letter on Arabic script isolates the first letter from
+   the word it must join to, so the word visually falls apart. Disabled. */
+html[dir="rtl"] .dropcap > p:first-of-type::first-letter,
+html[dir="rtl"] p.dropcap::first-letter,
+html[dir="rtl"] .preface-body p:first-of-type::first-letter,
+html[dir="rtl"] .lesson-article > p:first-of-type::first-letter,
+html[dir="rtl"] .lesson-article .drop-cap::first-letter {
+  float: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  padding: 0;
+  color: inherit;
+}
+
+/* Dashed rules and their reveal wipe both run left-to-right. */
+html[dir="rtl"] .ascii-rule,
+html[dir="rtl"] .lesson-article hr {
+  background-image:
+    repeating-linear-gradient(to left,
+      var(--blueprint) 0, var(--blueprint) 4px,
+      transparent 4px, transparent 8px),
+    repeating-linear-gradient(to left,
+      transparent 0, transparent 8px,
+      var(--blueprint-tint-strong) 8px, var(--blueprint-tint-strong) 14px);
+  background-position: 100% 0, 100% 3px;
+}
+
+html[dir="rtl"] body.js-anim .ascii-rule { clip-path: inset(0 0 0 100%); }
+html[dir="rtl"] body.js-anim .reveal--left { transform: translateX(20px); }
+
+html[dir="rtl"] .modal-close { right: auto; left: 16px; }
+html[dir="rtl"] .modal-progress-pct { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .modal-lesson-lang { text-align: left; }
+html[dir="rtl"] .cp-item { border-left: none; border-right: 3px solid transparent; }
+html[dir="rtl"] .cp-item:hover,
+html[dir="rtl"] .cp-item--active { border-right-color: var(--blueprint); }
+html[dir="rtl"] .cp-footer-shortcut { margin-left: 0; margin-right: auto; }
+
+/* Language switcher sits next to the theme toggle in both directions. */
+.lang-toggle {
+  background: transparent;
+  border: 1px solid var(--rule-soft);
+  min-width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.lang-toggle:hover {
+  border-color: var(--blueprint);
+  color: var(--blueprint);
+}
+
+.lang-toggle[lang="fa"] {
+  font-family: 'Peyda', var(--font-mono);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .lang-toggle { min-width: 32px; height: 32px; font-size: 0.72rem; }
+}
+
+@media (max-width: 480px) {
+  .lang-toggle { min-width: 30px; height: 30px; padding: 0 4px; }
+}
+
+@media (max-width: 600px) {
+  html[dir="rtl"] .header-nav { margin-left: 0; margin-right: auto; }
+  html[dir="rtl"] .modal-overlay { justify-content: flex-start; }
+  html[dir="rtl"] .modal-close { left: 12px; right: auto; }
+  html[dir="rtl"] .modal-header { padding-right: 0; padding-left: 38px; }
+  html[dir="rtl"] .modal-lesson-lang { text-align: left; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Home page (index.html)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html[dir="rtl"] .stat-row-value { text-align: left; }
+html[dir="rtl"] .toc-meta { text-align: left; }
+html[dir="rtl"] .toc-status { margin-right: 0; margin-left: 6px; }
+html[dir="rtl"] .masthead-btn-count {
+  padding-left: 0;
+  padding-right: 8px;
+  margin-left: 0;
+  margin-right: 4px;
+  border-left: none;
+  border-right: 1px solid currentColor;
+}
+html[dir="rtl"] .colophon-cmd .copy-btn {
+  right: auto;
+  left: 0;
+  padding-left: 0;
+  padding-right: 8px;
+}
+
+@media (max-width: 600px) {
+  html[dir="rtl"] .toc-row .toc-meta { text-align: right; }
+}
+
+@media (max-width: 480px) {
+  html[dir="rtl"] .stat-row-value { text-align: right; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Catalog
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html[dir="rtl"] .catalog-table th .sort-arrow { margin-left: 0; margin-right: 4px; }
+html[dir="rtl"] .catalog-status-dot { margin-right: 0; margin-left: 6px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Roadmap (prereqs.html)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html[dir="rtl"] .detail-prereq-list li .li-num,
+html[dir="rtl"] .detail-unlock-list li .li-num { margin-right: 0; margin-left: 6px; }
+html[dir="rtl"] .detail-section-title .title-icon { margin-right: 0; margin-left: 4px; }
+html[dir="rtl"] .detail-link:hover { transform: translate(1px, -1px); }
+
+/* The dependency graph is a coordinate-positioned SVG: mirroring it would
+   invert the arrow geometry as well as the labels. Keep the canvas LTR and
+   let each label pick its own direction from its content. */
+html[dir="rtl"] .graph-svg { direction: ltr; }
+html[dir="rtl"] .graph-svg .node-name {
+  unicode-bidi: plaintext;
+  letter-spacing: normal;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Glossary / About
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html[dir="rtl"] .glossary-card:hover { transform: translate(2px, -2px); }
+html[dir="rtl"] .glossary-card { box-shadow: -3px 3px 0 var(--ink); }
+html[dir="rtl"] .glossary-card:hover { box-shadow: -5px 5px 0 var(--ink); }
+html[dir="rtl"] .detail-panel { box-shadow: -3px 3px 0 var(--ink); }
+html[dir="rtl"] .cp-panel { box-shadow: -6px 6px 0 var(--ink); }
+html[dir="rtl"] .about ul { padding-left: 0; padding-right: 1.1em; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Lesson page (lesson.html)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html[dir="rtl"] .scroll-progress { left: auto; right: 0; }
+
+/* Sidebar moves to the right edge, table of contents to the left. */
+html[dir="rtl"] .lesson-sidebar {
+  left: auto;
+  right: 0;
+  border-right: none;
+  border-left: 1px solid var(--rule-soft);
+}
+
+html[dir="rtl"] .lesson-main { margin-left: 0; margin-right: 240px; }
+html[dir="rtl"] .toc-sidebar { right: auto; left: 0; }
+
+html[dir="rtl"] .lesson-sidebar-toggle { left: auto; right: 10px; }
+html[dir="rtl"] .sidebar-lesson-link {
+  border-left: none;
+  border-right: 2px solid transparent;
+}
+html[dir="rtl"] .sidebar-lesson-link.active { border-right-color: var(--blueprint); }
+
+html[dir="rtl"] .toc-nav {
+  border-left: none;
+  border-right: 1px solid var(--rule-soft);
+}
+html[dir="rtl"] .toc-link {
+  border-left: none;
+  border-right: 2px solid transparent;
+  margin-left: 0;
+  margin-right: -1px;
+}
+html[dir="rtl"] .toc-link.active { border-right-color: var(--blueprint); }
+html[dir="rtl"] .toc-h3 .toc-link { padding-left: 16px; padding-right: 28px; }
+
+/* Article furniture: accent bars swap edges. */
+html[dir="rtl"] .lesson-article h2.section-build,
+html[dir="rtl"] .lesson-article h2.section-use,
+html[dir="rtl"] .lesson-article h2.section-ship {
+  border-left: none;
+  border-right: 3px solid var(--blueprint);
+  padding-left: 0;
+  padding-right: 16px;
+}
+
+html[dir="rtl"] .lesson-article .motto,
+html[dir="rtl"] .lesson-article blockquote,
+html[dir="rtl"] .quiz-explanation {
+  border-left: none;
+  border-right: 2px solid var(--blueprint);
+}
+
+/* Hand-drawn list markers are absolutely positioned off the left edge. */
+html[dir="rtl"] .lesson-article ul { padding-left: 0; padding-right: 22px; }
+html[dir="rtl"] .lesson-article ul li { padding-left: 0; padding-right: 6px; }
+html[dir="rtl"] .lesson-article ul li::before { left: auto; right: -16px; }
+html[dir="rtl"] .lesson-article ol { padding-left: 0; padding-right: 28px; }
+html[dir="rtl"] .lesson-article ol li { padding-left: 0; padding-right: 6px; }
+html[dir="rtl"] .lesson-article ol li::before { left: auto; right: -28px; }
+html[dir="rtl"] .learning-objectives ul { padding-left: 0; padding-right: 20px; }
+
+/* Code-block chrome. */
+html[dir="rtl"] .code-lang { left: auto; right: 0; }
+html[dir="rtl"] .code-copy { right: auto; left: 8px; }
+
+/* Mermaid: keep the diagram canvas LTR (flow direction is authored, and the
+   arrow geometry is not mirror-safe) but let each label resolve its own
+   direction from its first strong character, so Persian labels read RTL and
+   identifier-only labels stay LTR. */
+html[dir="rtl"] .mermaid-render,
+html[dir="rtl"] .mermaid-modal-body { direction: ltr; }
+
+html[dir="rtl"] :where(
+  .lesson-article .mermaid-render foreignObject p,
+  .lesson-article .mermaid-render foreignObject span,
+  .mermaid-modal-body foreignObject p,
+  .mermaid-modal-body foreignObject span
+) {
+  unicode-bidi: plaintext;
+  letter-spacing: normal;
+}
+
+/* Bottom nav: the "next" button hugs the far edge. */
+html[dir="rtl"] .lesson-nav-btn.next {
+  text-align: left;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+html[dir="rtl"] .lesson-figure svg,
+html[dir="rtl"] .figure-body svg { direction: ltr; }
+
+@media (min-width: 1280px) {
+  html[dir="rtl"] .lesson-main { padding-right: 32px; padding-left: 240px; }
+}
+
+@media (max-width: 1279px) {
+  html[dir="rtl"] .lesson-main { padding-right: 32px; padding-left: 32px; }
+}
+
+@media (min-width: 1440px) {
+  html[dir="rtl"] .lesson-main {
+    margin-left: 0;
+    margin-right: 280px;
+    padding-right: 32px;
+    padding-left: 280px;
+  }
+}
+
+@media (max-width: 900px) {
+  html[dir="rtl"] .lesson-sidebar {
+    transform: translateX(100%);
+    border-left-color: var(--blueprint);
+    border-right-color: var(--rule-soft);
+    box-shadow: -16px 0 40px rgba(0, 0, 0, 0.22);
+  }
+  html[dir="rtl"] .lesson-sidebar.open { transform: translateX(0); }
+  html[dir="rtl"] .lesson-sidebar-toggle { right: auto; left: 16px; }
+  html[dir="rtl"] .lesson-main { margin-right: 0; }
+}
+
+@media (max-width: 768px) {
+  html[dir="rtl"] .lesson-nav-btn.next { text-align: right; }
+}
+
+@media (max-width: 480px) {
+  html[dir="rtl"] .lesson-sidebar-toggle { left: 12px; right: auto; }
+  html[dir="rtl"] .lesson-article ul { padding-right: 18px; padding-left: 0; }
+  html[dir="rtl"] .lesson-article ol { padding-right: 24px; padding-left: 0; }
+}
+
+/* Sidebar, table of contents and search results list titles that may still be
+   English (untranslated lessons). `plaintext` lets each entry resolve its own
+   direction from its content, so a Latin title reads left-to-right inside the
+   RTL panel instead of having its trailing punctuation flipped. */
+html[dir="rtl"] :is(.sidebar-lesson-link, .toc-link, .cp-item-name,
+  .cp-item-summary, .timeline-label, .continue-link, .lesson-nav-btn .nav-title,
+  .modal-lesson > a, .catalog-table td, .glossary-term) {
+  unicode-bidi: plaintext;
+}

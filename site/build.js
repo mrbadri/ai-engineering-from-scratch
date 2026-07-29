@@ -20,6 +20,12 @@ const OUTPUT_PATH = path.join(__dirname, 'data.js');
 const GITHUB_BASE = 'https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/';
 const SITE_ORIGIN = 'https://aiengineeringfromscratch.com';
 
+// Languages the site *chrome* is translated into, besides English. Keep this
+// in step with the LANGS registry in site/i18n.js — it drives which localized
+// URLs go into sitemap.xml. Lesson bodies are listed per lesson instead, from
+// whichever docs/<lang>.md files actually exist.
+const SITE_LANGS = ['fa'];
+
 // GITHUB_BASE lesson url -> site path "phases/<phase>/<lesson>"
 function lessonPath(url) {
   if (!url) return null;
@@ -230,41 +236,173 @@ function parseReadme(content, roadmapStatuses) {
   return phases;
 }
 
-// ─── Extract lesson summary + keywords from docs/en.md ───────────────
+// ─── Extract lesson metadata from docs/<lang>.md ─────────────────────
 /**
- * Single-pass read of a lesson's docs/en.md.
- *
- * Returns:
+ * Per-lesson doc fields read out of the Markdown:
+ *   name     — the `# H1` heading (the lesson title in that language).
  *   summary  — first `> blockquote` line (the lesson's one-liner motto).
  *   keywords — all `### H3` heading texts joined by ' · '.
  *              H3 headings are the densest vocabulary in a lesson doc
  *              (e.g. "Scaled dot-product · Causal masking · KV cache"),
  *              so they extend search coverage without bloating data.js.
  *
- * Both fields are empty strings when the file is absent or has no
- * matching content — expected for planned lessons with no docs yet.
+ * Fields come back empty when the file is absent or has no matching
+ * content — expected for planned lessons with no docs yet.
+ */
+// A lesson's docs/ directory holds en.md plus one file per translation
+// (fa.md, es.md, …), named by ISO 639-1 code with an optional region subtag.
+const DOC_LANG_FILE = /^([a-z]{2}(?:-[a-z]{2})?)\.md$/i;
+const SOURCE_LANG = 'en';
+
+/**
+ * Read one lesson doc in a single pass.
+ *
+ * Adds `name` to the fields above: the `# H1` heading, i.e. the lesson title
+ * as written in that language. The site uses it to localize titles in the
+ * sidebar, catalog, and search without needing a separate translation table.
+ *
+ * Returns null when the file is absent or unreadable — expected for planned
+ * lessons with no docs, and for every language not yet translated.
+ */
+function extractDocMeta(docPath) {
+  let lines;
+  try {
+    lines = fs.readFileSync(docPath, 'utf8').split(/\r?\n/);
+  } catch (_) {
+    return null;
+  }
+  const result = { name: '', summary: '', keywords: '' };
+  const h3s = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!result.name && line.startsWith('# ')) {
+      result.name = line.slice(2).trim();
+    }
+    if (!result.summary && line.startsWith('> ') && line.length > 3) {
+      const s = line.slice(2).trim();
+      result.summary = s.length > 180 ? s.slice(0, 177) + '…' : s;
+    }
+    if (line.startsWith('### ')) {
+      const heading = line.slice(4).trim();
+      if (heading) h3s.push(heading);
+    }
+  }
+  if (h3s.length) result.keywords = h3s.join(' · ');
+  return result;
+}
+
+// Quiz translations sit beside the lesson: quiz.json is the English source and
+// quiz.<lang>.json is a translation of it.
+const QUIZ_LANG_FILE = /^quiz\.([a-z]{2}(?:-[a-z]{2})?)\.json$/i;
+
+/**
+ * Which languages this lesson's quiz is translated into.
+ *
+ * Also sanity-checks each translation against the source, because a quiz that
+ * drifts structurally fails silently in the browser: a changed `correct` index
+ * marks the wrong answer as right, and a dropped question simply disappears.
+ */
+function extractQuizLangs(relPath) {
+  const lessonDir = path.join(REPO_ROOT, relPath);
+  const langs = [];
+
+  let source;
+  try {
+    source = JSON.parse(fs.readFileSync(path.join(lessonDir, 'quiz.json'), 'utf8'));
+  } catch (_) {
+    return langs; // no source quiz — nothing to translate against
+  }
+  const sourceQuestions = (source && source.questions) || source || [];
+
+  let files;
+  try {
+    files = fs.readdirSync(lessonDir).sort();
+  } catch (_) {
+    return langs;
+  }
+
+  for (const file of files) {
+    const match = file.match(QUIZ_LANG_FILE);
+    if (!match) continue;
+    const code = match[1].toLowerCase();
+    if (code === SOURCE_LANG) continue;
+
+    const label = `${relPath}/${file}`;
+    let translated;
+    try {
+      translated = JSON.parse(fs.readFileSync(path.join(lessonDir, file), 'utf8'));
+    } catch (err) {
+      console.warn(`⚠️  ${label}: invalid JSON, skipped (${err.message})`);
+      continue;
+    }
+    const questions = (translated && translated.questions) || translated || [];
+
+    if (questions.length !== sourceQuestions.length) {
+      console.warn(`⚠️  ${label}: ${questions.length} questions, source has ${sourceQuestions.length}`);
+    } else {
+      questions.forEach((q, i) => {
+        const src = sourceQuestions[i];
+        if (q.correct !== src.correct) {
+          console.warn(`⚠️  ${label} Q${i + 1}: correct=${q.correct}, source has ${src.correct}`);
+        }
+        if (q.stage !== src.stage) {
+          console.warn(`⚠️  ${label} Q${i + 1}: stage="${q.stage}", source has "${src.stage}"`);
+        }
+        if ((q.options || []).length !== (src.options || []).length) {
+          console.warn(`⚠️  ${label} Q${i + 1}: ${(q.options || []).length} options, ` +
+            `source has ${(src.options || []).length}`);
+        }
+      });
+    }
+
+    langs.push(code);
+  }
+
+  return langs;
+}
+
+/**
+ * Read every language variant of one lesson's docs.
+ *
+ * `summary`/`keywords` stay top-level and English so existing consumers are
+ * unchanged. Translations land in two new fields: `langs` (which languages
+ * exist — the site reads this to decide whether to fall back to English) and
+ * `i18n` (localized title/summary/keywords, keyed by language code).
  */
 function extractLessonMeta(relPath) {
-  const docPath = path.join(REPO_ROOT, relPath, 'docs', 'en.md');
-  const result = { summary: '', keywords: '' };
-  try {
-    const lines = fs.readFileSync(docPath, 'utf8').split(/\r?\n/);
-    const h3s = [];
-    for (const raw of lines) {
-      const line = raw.trim();
-      if (!result.summary && line.startsWith('> ') && line.length > 3) {
-        const s = line.slice(2).trim();
-        result.summary = s.length > 180 ? s.slice(0, 177) + '…' : s;
-      }
-      if (line.startsWith('### ')) {
-        const heading = line.slice(4).trim();
-        if (heading) h3s.push(heading);
-      }
-    }
-    if (h3s.length) result.keywords = h3s.join(' · ');
-  } catch (_) {
-    // File absent or unreadable — expected for planned lessons.
+  const docsDir = path.join(REPO_ROOT, relPath, 'docs');
+  const result = { summary: '', keywords: '', langs: [], i18n: {} };
+
+  const source = extractDocMeta(path.join(docsDir, `${SOURCE_LANG}.md`));
+  if (source) {
+    result.summary = source.summary;
+    result.keywords = source.keywords;
   }
+
+  let files;
+  try {
+    files = fs.readdirSync(docsDir).sort();
+  } catch (_) {
+    return result; // no docs/ directory — planned lesson
+  }
+
+  for (const file of files) {
+    const match = file.match(DOC_LANG_FILE);
+    if (!match) continue;
+    const code = match[1].toLowerCase();
+    if (code === SOURCE_LANG) continue;
+
+    const meta = extractDocMeta(path.join(docsDir, file));
+    if (!meta) continue;
+    result.langs.push(code);
+
+    const entry = {};
+    if (meta.name) entry.name = meta.name;
+    if (meta.summary) entry.summary = meta.summary;
+    if (meta.keywords) entry.keywords = meta.keywords;
+    if (Object.keys(entry).length) result.i18n[code] = entry;
+  }
+
   return result;
 }
 
@@ -441,8 +579,10 @@ function build() {
   console.log('🔍 Discovering outputs + Phase 14 missions...');
   const artifacts = discoverArtifacts();
 
-  console.log('📚 Extracting lesson summaries + keywords from docs/en.md...');
+  console.log('📚 Extracting lesson summaries + keywords + translations from docs/...');
   let summarized = 0, withKeywords = 0;
+  const translationCounts = {}; // lang code -> lessons translated
+  const quizCounts = {};        // lang code -> quizzes translated
   for (const phase of phases) {
     for (const lesson of phase.lessons) {
       if (lesson.url) {
@@ -450,6 +590,22 @@ function build() {
         const meta = extractLessonMeta(relPath);
         if (meta.summary)  { lesson.summary  = meta.summary;  summarized++;   }
         if (meta.keywords) { lesson.keywords = meta.keywords; withKeywords++; }
+        if (meta.langs.length) {
+          lesson.langs = meta.langs;
+          lesson.i18n = meta.i18n;
+          for (const code of meta.langs) {
+            translationCounts[code] = (translationCounts[code] || 0) + 1;
+          }
+        }
+        // Quiz translations are tracked separately: a lesson's prose and its
+        // quiz are translated by different passes and either can land first.
+        const quizLangs = extractQuizLangs(relPath);
+        if (quizLangs.length) {
+          lesson.quizLangs = quizLangs;
+          for (const code of quizLangs) {
+            quizCounts[code] = (quizCounts[code] || 0) + 1;
+          }
+        }
       }
     }
   }
@@ -467,6 +623,12 @@ function build() {
   console.log(`   Lessons: ${totalLessons}`);
   console.log(`   Complete: ${completeLessons}`);
   console.log(`   Summaries: ${summarized}, Keywords: ${withKeywords}`);
+  const translationSummary = Object.keys(translationCounts).sort()
+    .map(code => `${code}: ${translationCounts[code]}`).join(', ');
+  console.log(`   Translated lessons: ${translationSummary || 'none'}`);
+  const quizSummary = Object.keys(quizCounts).sort()
+    .map(code => `${code}: ${quizCounts[code]}`).join(', ');
+  console.log(`   Translated quizzes: ${quizSummary || 'none'}`);
   console.log(`   Glossary terms: ${glossaryTerms.length}`);
   console.log(`   Artifacts: ${artifacts.length}`);
 
@@ -486,33 +648,73 @@ const ARTIFACTS = ${JSON.stringify(artifacts, null, 2)};
 
   syncCounts(totalLessons, phases.length, artifacts.length);
   syncReadme(totalLessons);
-  writeSitemap(phases, glossaryTerms.length);
+  writeSitemap(phases, glossaryTerms.length, SITE_LANGS);
   writeLlms(phases, glossaryTerms.length, artifacts.length);
 }
 
 // ─── sitemap.xml from the same PHASES the site renders ───────────────────
-function writeSitemap(phases, glossaryCount) {
+// The site is one set of pages that switch language via ?lang=, so each
+// translated page is emitted as its own <url> and every variant of a page
+// cross-references the others with xhtml:link alternates. Crawlers need both
+// halves: the separate URL to index, and the alternates to know they are the
+// same document in another language.
+function writeSitemap(phases, glossaryCount, siteLangs) {
   const today = new Date().toISOString().slice(0, 10);
+
+  // Chrome-only pages are translated for every language the site ships.
   const urls = [
-    { loc: '/', priority: '1.0', freq: 'weekly' },
-    { loc: '/catalog.html', priority: '0.8', freq: 'weekly' },
-    { loc: '/prereqs.html', priority: '0.7', freq: 'monthly' },
+    { loc: '/', priority: '1.0', freq: 'weekly', langs: siteLangs },
+    { loc: '/catalog.html', priority: '0.8', freq: 'weekly', langs: siteLangs },
+    { loc: '/prereqs.html', priority: '0.7', freq: 'monthly', langs: siteLangs },
   ];
-  if (glossaryCount > 0) urls.push({ loc: '/glossary.html', priority: '0.6', freq: 'monthly' });
+  if (glossaryCount > 0) {
+    urls.push({ loc: '/glossary.html', priority: '0.6', freq: 'monthly', langs: siteLangs });
+  }
   for (const phase of phases) {
     for (const l of phase.lessons) {
       const p = lessonPath(l.url);
-      if (p) urls.push({ loc: '/lesson.html?path=' + p, priority: '0.6', freq: 'monthly' });
+      // A lesson page only exists in a language once its docs/<lang>.md does.
+      if (p) {
+        urls.push({
+          loc: '/lesson.html?path=' + p,
+          priority: '0.6',
+          freq: 'monthly',
+          langs: Array.isArray(l.langs) ? l.langs : [],
+        });
+      }
     }
   }
-  const body = urls.map(u =>
-    `  <url>\n    <loc>${SITE_ORIGIN}${u.loc}</loc>\n` +
-    `    <lastmod>${today}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n` +
-    `    <priority>${u.priority}</priority>\n  </url>`).join('\n');
+
+  const esc = s => s.replace(/&/g, '&amp;');
+  const localized = (loc, lang) =>
+    lang === SOURCE_LANG ? loc : loc + (loc.includes('?') ? '&' : '?') + 'lang=' + lang;
+
+  const entries = [];
+  for (const u of urls) {
+    const variants = [SOURCE_LANG, ...u.langs];
+    const alternates = variants.map(lang =>
+      `    <xhtml:link rel="alternate" hreflang="${lang}" ` +
+      `href="${esc(SITE_ORIGIN + localized(u.loc, lang))}"/>`
+    ).concat(
+      `    <xhtml:link rel="alternate" hreflang="x-default" ` +
+      `href="${esc(SITE_ORIGIN + u.loc)}"/>`
+    ).join('\n');
+
+    for (const lang of variants) {
+      entries.push(
+        `  <url>\n    <loc>${esc(SITE_ORIGIN + localized(u.loc, lang))}</loc>\n` +
+        `${alternates}\n` +
+        `    <lastmod>${today}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n` +
+        `    <priority>${u.priority}</priority>\n  </url>`
+      );
+    }
+  }
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n` +
+    `        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${entries.join('\n')}\n</urlset>\n`;
   fs.writeFileSync(path.join(__dirname, 'sitemap.xml'), xml, 'utf8');
-  console.log(`   wrote sitemap.xml (${urls.length} URLs)`);
+  console.log(`   wrote sitemap.xml (${entries.length} URLs)`);
 }
 
 // ─── llms.txt: a link-rich map of the curriculum for AI agents ───────────
@@ -526,6 +728,7 @@ function writeLlms(phases, glossaryCount, artifactCount) {
   out += `Source: https://github.com/rohitg00/ai-engineering-from-scratch\n`;
   out += `Glossary terms: ${glossaryCount} · Reusable outputs (prompts/skills/agents): ${artifactCount}\n\n`;
   out += `Lesson pages render client-side. Agents: fetch each lesson's raw markdown link; it is the full text. Lesson directories may also include code/ (runnable implementation) and quiz.json.\n\n`;
+  out += `English is the source language. Lessons that carry a "raw <code>" link are also available in that language, both as docs/<code>.md and on the site at ?lang=<code>. Site languages: ${['en', ...SITE_LANGS].join(', ')}.\n\n`;
   for (const phase of phases) {
     out += `## Phase ${phase.id}: ${phase.name}\n`;
     if (phase.desc) out += `${phase.desc}\n`;
@@ -534,7 +737,9 @@ function writeLlms(phases, glossaryCount, artifactCount) {
       const p = lessonPath(l.url);
       if (!p) continue;
       const note = l.summary ? ` — ${l.summary}` : '';
-      out += `- [${l.name}](${SITE_ORIGIN}/lesson.html?path=${p}) · [raw](${rawOrigin}/${p}/docs/en.md)${note}\n`;
+      const translations = (Array.isArray(l.langs) ? l.langs : [])
+        .map(code => ` · [raw ${code}](${rawOrigin}/${p}/docs/${code}.md)`).join('');
+      out += `- [${l.name}](${SITE_ORIGIN}/lesson.html?path=${p}) · [raw](${rawOrigin}/${p}/docs/en.md)${translations}${note}\n`;
     }
     out += `\n`;
   }
@@ -589,7 +794,13 @@ function syncReadme(lessons) {
 
 // ─── Keep marketing counts in sync (single source of truth = this build) ──
 function syncCounts(lessons, phaseCount, outputs) {
-  const targets = ['index.html', 'catalog.html', 'lesson.html', 'prereqs.html', 'cmdpalette.js'];
+  const targets = [
+    'index.html', 'catalog.html', 'lesson.html', 'prereqs.html', 'about.html',
+    'glossary.html', 'cmdpalette.js', 'i18n-strings.js',
+  ];
+  // Localized counts live in i18n-strings.js alongside the English ones, so
+  // they are kept in step here too — otherwise the Persian copy would quietly
+  // drift from the real lesson count. Add a pattern per language.
   for (const f of targets) {
     const p = path.join(__dirname, f);
     if (!fs.existsSync(p)) continue;
@@ -597,7 +808,13 @@ function syncCounts(lessons, phaseCount, outputs) {
     const after = before
       .replace(/\b\d+( AI engineering)? lessons\b/g, `${lessons}$1 lessons`)
       .replace(/\b\d+ phases\b/g, `${phaseCount} phases`)
-      .replace(/\b\d+ outputs\b/g, `${outputs} outputs`);
+      .replace(/\b\d+ outputs\b/g, `${outputs} outputs`)
+      // Persian: "درس" = lessons, "فاز" = phases, "خروجی" = outputs.
+      // No trailing \b — JS \b is ASCII-only and never fires after Arabic
+      // script, so it would make these patterns unmatchable.
+      .replace(/\b\d+ درس/g, `${lessons} درس`)
+      .replace(/\b\d+ فاز/g, `${phaseCount} فاز`)
+      .replace(/\b\d+ خروجی/g, `${outputs} خروجی`);
     if (after !== before) {
       fs.writeFileSync(p, after, 'utf8');
       console.log(`   synced counts in ${f}`);
