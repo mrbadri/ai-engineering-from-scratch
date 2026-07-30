@@ -601,3 +601,15 @@ html[dir="rtl"] :is(.cp-item-name, .cp-item-summary, .continue-link,
   .modal-lesson > a, .catalog-table td, .glossary-term) {
   unicode-bidi: plaintext;
 }
+
+/* Phase-modal lesson rows: pin the title to the row's start edge, beside the
+   status marker.
+   The title column is a wide `1fr` grid cell. `plaintext` above resolves an
+   untranslated English title to LTR, which makes the default `start` alignment
+   mean *left* — so the title drifted to the far side of its cell and left a gap
+   between it and the status marker. Alignment and bidi ordering are independent
+   properties: this fixes where the line sits without disturbing the LTR reading
+   order of the title itself. */
+html[dir="rtl"] .modal-lesson > a {
+  text-align: right;
+}
