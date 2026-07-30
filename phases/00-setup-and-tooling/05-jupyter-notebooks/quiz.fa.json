@@ -1,0 +1,39 @@
+{
+  "questions": [
+    {
+      "stage": "pre",
+      "question": "Jupyter notebook چیست؟",
+      "options": ["یک text editor برای نوشتن Python scriptها", "یک سند تعاملی که code cellهای قابل‌اجرا را با متن markdown و outputهای inline ترکیب می‌کند", "یک version control system برای پروژه‌های data science", "یک package manager برای libraryهای Python"],
+      "correct": 1,
+      "explanation": "Jupyter notebook (با پسوند .ipynb) محیطی تعاملی است که در آن می‌توانید کد را در cellها بنویسید و اجرا کنید، outputها را به‌صورت inline ببینید و کد را با توضیح‌های قالب‌بندی‌شده ترکیب کنید."
+    },
+    {
+      "stage": "pre",
+      "question": "Jupyter kernel چه کاری انجام می‌دهد؟",
+      "options": ["cellهای markdown را به HTML قالب‌بندی می‌کند", "کد cellها را اجرا می‌کند و متغیرها را بین اجراها در memory نگه می‌دارد", "storage فایل‌های notebook را مدیریت می‌کند", "notebook را برای version control به GitHub متصل می‌کند"],
+      "correct": 1,
+      "explanation": "kernel یک فرایند Python جداگانه است که کد cellها را اجرا می‌کند و state (متغیرها و importها) را در memory نگه می‌دارد. همهٔ cellهای یک notebook از همان kernel مشترک استفاده می‌کنند."
+    },
+    {
+      "stage": "post",
+      "question": "تفاوت magic commandهای %timeit و %%time چیست؟",
+      "options": ["%timeit زمان wall را اندازه می‌گیرد و %%time زمان CPU را", "%timeit کد را چند بار اجرا و میانگین‌گیری می‌کند و %%time کد را یک‌بار اجرا می‌کند", "%timeit روی یک خط کار می‌کند و %%time روی کل notebook کار می‌کند", "تفاوتی ندارند و alias یکدیگر هستند"],
+      "correct": 1,
+      "explanation": "%timeit دستور را چند بار اجرا می‌کند تا میانگین آماری به دست آورد (مناسب microbenchmarkها). %%time، cell را یک‌بار اجرا می‌کند و زمان wall را گزارش می‌دهد (مناسب training runها)."
+    },
+    {
+      "stage": "post",
+      "question": "رایج‌ترین علت اینکه یک notebook روی دستگاه شما کار می‌کند اما وقتی فرد دیگری آن را از ابتدا تا انتها اجرا می‌کند شکست می‌خورد چیست؟",
+      "options": ["استفاده از نسخهٔ متفاوت Python", "اجرای cellها خارج از ترتیب که وابستگی‌های پنهانی به ترتیب اجرا ایجاد می‌کند", "نبودن magic command مربوط به %matplotlib inline", "استفاده از markdown cellهای بیش از حد"],
+      "correct": 1,
+      "explanation": "اجرای cellها خارج از ترتیب، وابستگی‌های پنهانی به state ایجاد می‌کند. ممکن است متغیری فقط به این دلیل وجود داشته باشد که cell 5 را پیش از cell 2 اجرا کرده‌اید. Kernel > Restart & Run All اجرای خطی را بررسی می‌کند."
+    },
+    {
+      "stage": "post",
+      "question": "چه زمانی باید کد را از notebook به یک script با پسوند .py منتقل کنید؟",
+      "options": ["به‌محض اینکه بیش از 10 خط کد نوشتید", "وقتی کد یک utility قابل‌استفادهٔ مجدد، training pipeline یا production code است", "هرگز — notebookها همیشه برای کار AI بهتر هستند", "فقط وقتی لازم است روی GPU اجرا شود"],
+      "correct": 1,
+      "explanation": "قاعده این است: «در notebook کاوش کنید، در script عرضه کنید.» utilityهای قابل‌استفادهٔ مجدد، training pipelineها و هر چیزی که در production اجرا می‌شود باید در فایل‌های .py باشند. notebookها برای کاوش و نمونه‌سازی هستند."
+    }
+  ]
+}

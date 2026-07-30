@@ -160,6 +160,9 @@ parentheses on first use. Prefer these conventions consistently across lessons:
 | serious training | serious training (آموزش جدی) | آموزش جدی without the origin term on first use |
 | dataset | dataset (مجموعه‌داده) | مجموعه‌داده without the searchable English term |
 | notebook | notebook (نوت‌بوک) | دفترچه when referring to a computational notebook |
+| kernel | kernel (کرنل) | هسته when referring to the process that executes notebook cells |
+| cell | cell (سلول) | بلوک when referring to an independently runnable notebook unit |
+| magic command | magic command (دستور ویژهٔ Jupyter) | دستور جادویی, which is ambiguous outside the Jupyter context |
 | quick experiment | quick experiment (آزمایش سریع) | آزمایش سریع without the origin term on first use |
 | reproducible build | reproducible build (build قابل‌بازتولید) | ساخت بازتولیدپذیر when the build workflow is meant |
 | standard build | standard build (build معمولی) | ساخت ساده when referring to a package or binary build |
