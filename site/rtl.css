@@ -459,6 +459,13 @@ html[dir="rtl"] .about ul { padding-left: 0; padding-right: 1.1em; }
 
 html[dir="rtl"] .scroll-progress { left: auto; right: 0; }
 
+/* Translation notices and phase links are Persian UI chrome, including when
+   the lesson body itself falls back to the English source. */
+html[dir="rtl"] :is(.lesson-translation-notice, .sidebar-phase-nav) {
+  direction: rtl;
+  text-align: right;
+}
+
 /* Sidebar moves to the right edge, table of contents to the left. */
 html[dir="rtl"] .lesson-sidebar {
   left: auto;
