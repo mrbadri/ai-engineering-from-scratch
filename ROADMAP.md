@@ -614,3 +614,5 @@ Total estimated time: ~314 hours, at your own pace.
 **Total: 20 phases, 503 lessons | 503 complete | ~1,050 hours estimated**
 
 Want to help? Pick any ⬚ lesson and submit a PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Want to translate a lesson? Follow the workflow in [TRANSLATE.md](TRANSLATE.md).

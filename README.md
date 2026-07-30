@@ -1140,6 +1140,7 @@ HEAD/GET).
 | Goal | Read |
 |---|---|
 | Contribute a lesson or fix | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Contribute a translation | [TRANSLATE.md](TRANSLATE.md) |
 | Fork for your team or school | [FORKING.md](FORKING.md) |
 | Lesson template | [LESSON_TEMPLATE.md](LESSON_TEMPLATE.md) |
 | Track progress | [ROADMAP.md](ROADMAP.md) |
