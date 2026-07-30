@@ -1,0 +1,39 @@
+{
+  "questions": [
+    {
+      "stage": "pre",
+      "question": "API key هنگام فراخوانی یک LLM service چه کاربردی دارد؟",
+      "options": ["رمزگذاری دادهٔ ارسال‌شده به server", "احراز هویت شما و مجاز کردن requestها", "فشرده‌سازی requestها برای کاهش پهنای باند", "انتخاب زبان برنامه‌نویسی مورد استفادهٔ server"],
+      "correct": 1,
+      "explanation": "API key یک رشتهٔ یکتا است که account شما را شناسایی می‌کند، به requestهایتان مجوز می‌دهد و به provider امکان track کردن usage و billing را می‌دهد."
+    },
+    {
+      "stage": "pre",
+      "question": "چرا API keyها هرگز نباید مستقیماً در source code hardcode شوند؟",
+      "options": ["keyهای hardcodeشده باعث کندتر اجرا شدن code می‌شوند", "ممکن است به‌طور تصادفی در git commit شوند و عمومی افشا شوند", "Python نمی‌تواند literalهای رشته‌ای طولانی‌تر از 50 کاراکتر را بخواند", "API providerها keyهایی را که در source file ظاهر شوند مسدود می‌کنند"],
+      "correct": 1,
+      "explanation": "API keyهای hardcodeشده ممکن است وارد version control شوند و به repositoryهای عمومی push شوند؛ در آنجا دیگران می‌توانند آن‌ها را scrape و سوءاستفاده کنند."
+    },
+    {
+      "stage": "post",
+      "question": "روش پیشنهادی برای ذخیرهٔ API keyها در local development چیست؟",
+      "options": ["در یک variable پایتون در ابتدای script", "در یک فایل .env که در .gitignore فهرست شده است", "در README.md برای دسترسی آسان", "در requirements.txt در کنار versionهای package"],
+      "correct": 1,
+      "explanation": "فایل .env، keyها را به‌عنوان environment variable ذخیره می‌کند و باید به .gitignore اضافه شود تا هرگز وارد version control نشود. SDKها keyها را به‌طور خودکار از environment variableها می‌خوانند."
+    },
+    {
+      "stage": "post",
+      "question": "در raw HTTP API call به Anthropic، کدام header حامل API key است؟",
+      "options": ["Authorization: Bearer sk-ant-...", "x-api-key: sk-ant-...", "Content-Type: application/json", "anthropic-version: 2023-06-01"],
+      "correct": 1,
+      "explanation": "API Anthropic برای authentication از header «x-api-key» استفاده می‌کند، نه الگوی رایج‌تر «Authorization: Bearer». این موضوع مخصوص طراحی API آن‌هاست."
+    },
+    {
+      "stage": "post",
+      "question": "وقتی از rate limit یک API عبور می‌کنید چه اتفاقی می‌افتد؟",
+      "options": ["API key شما برای همیشه revoke می‌شود", "server یک error (معمولاً HTTP 429) برمی‌گرداند و باید برای retry کردن صبر کنید", "request شما در صف قرار می‌گیرد و بعداً به‌طور خودکار پردازش می‌شود", "API بدون هیچ responseای request شما را بی‌صدا حذف می‌کند"],
+      "correct": 1,
+      "explanation": "Rate limiting کد HTTP 429 (Too Many Requests) را برمی‌گرداند. باید صبر کنید و دوباره تلاش کنید؛ معمولاً با exponential backoff. Rate limitها از سوءاستفاده جلوگیری می‌کنند و استفادهٔ منصفانه را تضمین می‌کنند."
+    }
+  ]
+}
