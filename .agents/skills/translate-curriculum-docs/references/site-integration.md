@@ -163,29 +163,32 @@ work is needed on your side.
 
 ## Previewing your work
 
-Serve the **repository root** — not `site/` — so the page can reach your
-working tree:
+Use the repository's combined local server so the landing page and working-tree
+lesson files share one origin:
 
 ```bash
 node site/build.js                  # records the translation in data.js
-python3 -m http.server 8000         # from the top of the checkout
+python3 scripts/serve_site.py       # landing site + working-tree lessons
 ```
 
-Then open
-`http://localhost:8000/site/lesson.html?path=phases/00-setup-and-tooling/01-dev-environment&lang=fa`.
+Then open `http://localhost:8000/` for the landing page or
+`http://localhost:8000/lesson.html?path=phases/00-setup-and-tooling/01-dev-environment&lang=fa`
+for a lesson.
 
-On localhost, `lesson.html` tries `../<lesson>/docs/<lang>.md` relative to the
-page first, so you see the file you just edited with no commit and no push. It
-falls back to `raw.githubusercontent.com/<repo>/<ref>/…` — where `<ref>` comes
-from `site/build-meta.js`, written by `build.js` from your current branch — which
-is the only path used in production.
+On localhost, `lesson.html` tries `/phases/<lesson>/docs/<lang>.md` and the
+matching quiz from the working tree first, so you see files you just edited with
+no commit or push. It falls back to
+`raw.githubusercontent.com/<repo>/<ref>/…` — where `<ref>` comes from
+`site/build-meta.js`, written by `build.js` from your current branch — which is
+the only path used in production.
 
-Two consequences worth knowing:
+If you use Python's plain `http.server` from `site/`, the landing page works but
+`/phases/...` returns 404 because the repository is outside that server root.
+If you use plain `http.server` from the repository root, the files work but the
+landing page is under `/site/`. `scripts/serve_site.py` handles both mappings.
 
-- If you serve `site/` as the document root instead, the working-tree copy is
-  not reachable over HTTP. The request 404s, the remote fetch takes over, and an
-  unpushed translation renders as the English source under a "not translated
-  yet" notice. That is the fallback working, not a fault in your translation.
+Two production-preview consequences are worth knowing:
+
 - A Vercel PR preview has no working tree, so it resolves against the PR's own
   branch. Push before asking anyone to review the rendered page.
 

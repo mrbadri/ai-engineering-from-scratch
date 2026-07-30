@@ -22,7 +22,7 @@
         "یک container runtime (runtime کانتینر) برای سرویس‌دهی مدل"
       ],
       "correct": 2,
-      "explanation": "CUDA سکوی محاسبات موازی NVIDIA است و به شما امکان می‌دهد عملیات ماتریسی را هم‌زمان روی هزاران هستهٔ GPU اجرا کنید. PyTorch و TensorFlow در پشت صحنه از آن استفاده می‌کنند."
+      "explanation": "CUDA یک parallel computing platform (سکوی محاسبات موازی) از NVIDIA است و به شما امکان می‌دهد عملیات ماتریسی را هم‌زمان روی هزاران هستهٔ GPU اجرا کنید. PyTorch و TensorFlow در پشت صحنه از آن استفاده می‌کنند."
     },
     {
       "stage": "post",

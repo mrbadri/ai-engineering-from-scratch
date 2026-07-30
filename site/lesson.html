@@ -1822,6 +1822,48 @@
       // Which language the rendered article body is actually in. Set by
       // fetchLesson: equal to LANG on a hit, SOURCE_LANG after a fallback.
       var docLang = LANG;
+      // Same, for the quiz. Prose and quiz are translated independently, so a
+      // Persian lesson can legitimately carry an English quiz.
+      var quizLang = LANG;
+
+      /**
+       * The writing direction a given string should be laid out in.
+       *
+       * CSS `unicode-bidi: plaintext` cannot do this job. It derives paragraph
+       * direction from the *first strong character*, and translated technical
+       * strings routinely open with an English term:
+       *
+       *   "virtual environmentها باعث می‌شوند کد سریع‌تر اجرا شود"
+       *   "Git و همکاری تیمی"
+       *
+       * plaintext reads the leading Latin run and lays the whole sentence out
+       * left-to-right, which throws the English term to the far end of the line,
+       * away from the Persian suffix bound to it.
+       *
+       * Presence of RTL script is the reliable signal instead: any string
+       * containing Arabic/Hebrew-script characters is RTL prose, and a string
+       * with none is English or code and is LTR. Stamped as a `dir` attribute so
+       * the UA stylesheet supplies the bidi isolation too.
+       */
+      var RTL_SCRIPT = /[֐-׿؀-ۿ܀-ݏݐ-ݿ߀-߿ࠀ-࠿ࢠ-ࣿיִ-﷿ﹰ-﻿]/;
+
+      function dirOf(text) {
+        return RTL_SCRIPT.test(String(text == null ? '' : text)) ? 'rtl' : 'ltr';
+      }
+
+      /** ` dir="…"` for interpolation straight into a tag. */
+      function dirAttr(text) {
+        return ' dir="' + dirOf(text) + '"';
+      }
+
+      /** Declared direction of a language code, from the i18n registry. */
+      function langDir(code) {
+        if (!i18n) return 'ltr';
+        for (var i = 0; i < i18n.langs.length; i++) {
+          if (i18n.langs[i].code === code) return i18n.langs[i].dir;
+        }
+        return 'ltr';
+      }
 
       var root = document.documentElement;
       var stored = localStorage.getItem('theme');
@@ -1994,7 +2036,8 @@
               html += '<span class="sidebar-lesson-link disabled">';
             }
             html += '<span class="sidebar-lesson-dot ' + les.status + '"></span>';
-            html += escapeHtml(lessonLabel(les));
+            var lesTitle = lessonLabel(les);
+            html += '<span' + dirAttr(lesTitle) + '>' + escapeHtml(lesTitle) + '</span>';
             html += lesReadable ? '</a>' : '</span>';
           }
         }
@@ -2133,15 +2176,20 @@
 
       function fetchLesson(path, retried) {
         if (!retried || !lessonQuizPromise) {
-          // Flattened so fetchFirst walks localized-local, localized-remote,
-          // source-local, source-remote and stops at the first hit.
-          var quizUrls = [];
-          quizCandidates().forEach(function (lang) {
-            quizUrls = quizUrls.concat(repoFileUrls(path + quizFileFor(lang)));
-          });
-          lessonQuizPromise = fetchFirst(quizUrls)
-            .then(function (res) { return res.json(); })
-            .catch(function () { return null; });
+          // Walked one language at a time rather than as one flat URL list, so
+          // that `quizLang` records which language actually answered — the
+          // renderer needs it to declare the quiz block's direction.
+          var quizLangs = quizCandidates();
+          lessonQuizPromise = (function attemptQuiz(idx) {
+            if (idx >= quizLangs.length) return Promise.resolve(null);
+            var lang = quizLangs[idx];
+            return fetchFirst(repoFileUrls(path + quizFileFor(lang)))
+              .then(function (res) { return res.json(); })
+              .then(function (data) { quizLang = lang; return data; })
+              // Covers a missing file and malformed JSON alike: either way the
+              // next language is the better answer.
+              .catch(function () { return attemptQuiz(idx + 1); });
+          }(0));
         }
 
         var candidates = docCandidates();
@@ -2371,7 +2419,8 @@
           var fullText = (heading.textContent || '').trim();
           var text = fullText.replace(/^[^\p{L}\p{N}]+/u, '').trim();
           if (!text) continue;
-          html += '<li class="toc-item toc-' + level + '"><a href="#' + id + '" class="toc-link" data-toc-id="' + id + '" title="' + escapeHtml(fullText) + '">' + escapeHtml(text) + '</a></li>';
+          html += '<li class="toc-item toc-' + level + '"><a href="#' + id + '" class="toc-link" data-toc-id="' + id + '"' +
+            dirAttr(text) + ' title="' + escapeHtml(fullText) + '">' + escapeHtml(text) + '</a></li>';
         }
         html += '</ul></nav>';
         sidebar.innerHTML = html;
@@ -3282,23 +3331,30 @@
 
       function buildQuizHtml(questions, id, title) {
         if (!questions.length) return '';
-        var html = '<div class="quiz-section" id="quiz-' + id + '">';
+        // The section declares the quiz file's own language, so an English quiz
+        // sitting inside a Persian page is a self-contained LTR block. Each
+        // string then gets its own dir, because a single quiz mixes translated
+        // prose with answers that are pure code.
+        var html = '<div class="quiz-section" id="quiz-' + id + '"' +
+          ' lang="' + quizLang + '" dir="' + langDir(quizLang) + '">';
         html += '<div class="quiz-title">&#9989; ' + escapeHtml(title) + '</div>';
         for (var qi = 0; qi < questions.length; qi++) {
           var q = questions[qi];
           var qid = id + '-q' + qi;
           html += '<div class="quiz-question" data-correct="' + q.correct + '" id="' + qid + '">';
-          html += '<div class="quiz-question-text">' + (qi + 1) + '. ' + escapeHtml(q.question) + '</div>';
+          html += '<div class="quiz-question-text"' + dirAttr(q.question) + '>' +
+            (qi + 1) + '. ' + escapeHtml(q.question) + '</div>';
           html += '<div class="quiz-options">';
           for (var oi = 0; oi < q.options.length; oi++) {
             html += '<div class="quiz-option" data-index="' + oi + '" onclick="handleQuizClick(this)">';
             html += '<span class="quiz-marker"></span>';
-            html += '<span>' + escapeHtml(q.options[oi]) + '</span>';
+            html += '<span' + dirAttr(q.options[oi]) + '>' + escapeHtml(q.options[oi]) + '</span>';
             html += '</div>';
           }
           html += '</div>';
           if (q.explanation) {
-            html += '<div class="quiz-explanation" id="' + qid + '-exp">' + escapeHtml(q.explanation) + '</div>';
+            html += '<div class="quiz-explanation" id="' + qid + '-exp"' +
+              dirAttr(q.explanation) + '>' + escapeHtml(q.explanation) + '</div>';
           }
           html += '</div>';
         }
@@ -3405,7 +3461,7 @@
         if (prev) {
           nav += '<a class="lesson-nav-btn prev" href="' + i18nUrl('lesson.html?path=' + prev.path) + '">';
           nav += '<span class="nav-label">' + escapeHtml(tr('lesson.navPrev')) + '</span>';
-          nav += '<span class="nav-title">' + escapeHtml(prev.lessonName) + '</span>';
+          nav += '<span class="nav-title"' + dirAttr(prev.lessonName) + '>' + escapeHtml(prev.lessonName) + '</span>';
           nav += '</a>';
         } else {
           nav += '<div></div>';
@@ -3413,7 +3469,7 @@
         if (next) {
           nav += '<a class="lesson-nav-btn next" href="' + i18nUrl('lesson.html?path=' + next.path) + '">';
           nav += '<span class="nav-label">' + escapeHtml(tr('lesson.navNext')) + '</span>';
-          nav += '<span class="nav-title">' + escapeHtml(next.lessonName) + '</span>';
+          nav += '<span class="nav-title"' + dirAttr(next.lessonName) + '>' + escapeHtml(next.lessonName) + '</span>';
           nav += '</a>';
         }
         nav += '</div>';
@@ -3649,16 +3705,19 @@
 
         if (lessonQuizPromise) {
           lessonQuizPromise.then(function (data) {
+            // Questions from the lesson's quiz file carry that file's language;
+            // the fallback bank is always in the interface language.
             var questions = lessonQuizPanelQuestions(data);
-            if (!questions.length) questions = getQuizQuestions();
-            fillQuizPanel(panel.querySelector('#quizContent'), questions);
+            var lang = quizLang;
+            if (!questions.length) { questions = getQuizQuestions(); lang = LANG; }
+            fillQuizPanel(panel.querySelector('#quizContent'), questions, lang);
           });
         } else {
-          fillQuizPanel(panel.querySelector('#quizContent'), getQuizQuestions());
+          fillQuizPanel(panel.querySelector('#quizContent'), getQuizQuestions(), LANG);
         }
       }
 
-      function fillQuizPanel(body, questions) {
+      function fillQuizPanel(body, questions, lang) {
         var phase = '';
         if (currentLessonIndex >= 0) {
           var fl = flatLessons[currentLessonIndex];
@@ -3666,23 +3725,28 @@
         }
 
         var html = '<div class="ai-panel-subtitle">' + escapeHtml(tr('panel.quiz.subtitle')) + '</div>';
-        html += '<div class="quiz-container" id="quizContainer">';
+        // Declares the question language, so an English quiz inside a Persian
+        // page is one self-contained LTR block. Per-string dir below then keeps
+        // code answers left-to-right inside a Persian quiz.
+        html += '<div class="quiz-container" id="quizContainer" lang="' + (lang || LANG) +
+          '" dir="' + langDir(lang || LANG) + '">';
 
         var letters = ['A', 'B', 'C', 'D'];
         questions.forEach(function (q, qi) {
           html += '<div class="quiz-question" id="quiz-q-' + qi + '">';
           html += '<div class="quiz-question-num">' +
             escapeHtml(tr('panel.quiz.questionOf', { n: qi + 1, total: questions.length })) + '</div>';
-          html += '<div class="quiz-question-text">' + escapeHtml(q.q) + '</div>';
+          html += '<div class="quiz-question-text"' + dirAttr(q.q) + '>' + escapeHtml(q.q) + '</div>';
           html += '<div class="quiz-options">';
           q.opts.forEach(function (opt, oi) {
             html += '<button class="quiz-option" data-qi="' + qi + '" data-oi="' + oi + '" onclick="handleQuizAnswer(' + qi + ',' + oi + ')">';
             html += '<span class="opt-letter">' + letters[oi] + '</span>';
-            html += '<span>' + escapeHtml(opt) + '</span>';
+            html += '<span' + dirAttr(opt) + '>' + escapeHtml(opt) + '</span>';
             html += '</button>';
           });
           html += '</div>';
-          html += '<div class="quiz-explanation" id="quiz-explain-' + qi + '">' + escapeHtml(q.explain) + '</div>';
+          html += '<div class="quiz-explanation" id="quiz-explain-' + qi + '"' +
+            dirAttr(q.explain) + '>' + escapeHtml(q.explain) + '</div>';
           html += '</div>';
         });
 
@@ -3794,7 +3858,7 @@
             html += '<span class="timeline-item ' + cls + ' disabled" title="' + escapeAttr(item.flat.lessonName) + '">';
           }
           html += '<div class="timeline-dot"></div>';
-          html += '<div class="timeline-label">' + escapeHtml(item.flat.lessonName) + '</div>';
+          html += '<div class="timeline-label"' + dirAttr(item.flat.lessonName) + '>' + escapeHtml(item.flat.lessonName) + '</div>';
           html += item.flat.isReadable ? '</a>' : '</span>';
         });
         if (hiddenAfter > 0) {

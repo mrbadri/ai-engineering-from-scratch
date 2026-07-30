@@ -101,10 +101,10 @@ Also register the language's section-heading wording in `SECTIONS` in
 
 ```bash
 node site/build.js
-cd site && python3 -m http.server 8899
+python3 scripts/serve_site.py --port 8899
 ```
 
-Open each page with `?lang=<code>` — `index.html`, `catalog.html`,
+Open each page with `?lang=<code>` — `/`, `/catalog.html`,
 `glossary.html`, `prereqs.html`, `about.html`, and a `lesson.html?path=…` — and
 check:
 

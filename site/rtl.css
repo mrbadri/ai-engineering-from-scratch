@@ -254,12 +254,20 @@ html[dir="rtl"] .i18n-id {
    first strong character, so an English sentence keeps its question mark and
    leading number in the right place instead of having them flipped to the
    far edge by the RTL paragraph direction. */
-html[dir="rtl"] :is(.quiz-question-text, .quiz-explanation, .quiz-score-label,
-  .quiz-option > span:last-child, .quiz-deeper, .output-desc, .code-card-size,
+html[dir="rtl"] :is(.quiz-deeper, .output-desc, .code-card-size,
   .lesson-contract-field, .glossary-col-says, .glossary-col-means,
   .detail-desc, .modal-desc, .cp-item-summary) {
   unicode-bidi: plaintext;
 }
+
+/* Quiz text and lesson titles are NOT in the list above. plaintext infers
+   direction from the first strong character, which is wrong precisely where it
+   matters most: a translated string often opens with an English technical term
+   ("virtual environmentها ...", "Git و همکاری تیمی"), and plaintext then
+   typesets the whole Persian sentence left-to-right and strands the Latin term
+   at the far end of the line, detached from the suffix bound to it.
+   lesson.html stamps an explicit `dir` on each of those strings instead, chosen
+   by whether the string contains any RTL script at all. See dirOf(). */
 
 /* ─── Reading direction of prose ────────────────────────────────────────
    The Latin design justifies body copy. Browsers do not implement kashida
@@ -582,8 +590,7 @@ html[dir="rtl"] .figure-body svg { direction: ltr; }
    English (untranslated lessons). `plaintext` lets each entry resolve its own
    direction from its content, so a Latin title reads left-to-right inside the
    RTL panel instead of having its trailing punctuation flipped. */
-html[dir="rtl"] :is(.sidebar-lesson-link, .toc-link, .cp-item-name,
-  .cp-item-summary, .timeline-label, .continue-link, .lesson-nav-btn .nav-title,
+html[dir="rtl"] :is(.cp-item-name, .cp-item-summary, .continue-link,
   .modal-lesson > a, .catalog-table td, .glossary-term) {
   unicode-bidi: plaintext;
 }

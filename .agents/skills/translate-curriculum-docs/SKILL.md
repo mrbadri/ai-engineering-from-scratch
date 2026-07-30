@@ -156,6 +156,8 @@ parentheses on first use. Prefer these conventions consistently across lessons:
 | GPU backend | GPU backend (بک‌اند GPU) | بک‌اند GPU without the searchable English term |
 | training run | training run (اجرای آموزش) | اجرای آموزشی when referring to one model run |
 | local GPU / cloud GPU | local GPU (GPU محلی) / cloud GPU (GPU ابری) | GPU محلی or GPU ابری without the origin term on first use |
+| cloud experiment | cloud experiment (آزمایش ابری) | آزمایش ابری without the origin term on first use |
+| serious training | serious training (آموزش جدی) | آموزش جدی without the origin term on first use |
 | dataset | dataset (مجموعه‌داده) | مجموعه‌داده without the searchable English term |
 | notebook | notebook (نوت‌بوک) | دفترچه when referring to a computational notebook |
 | quick experiment | quick experiment (آزمایش سریع) | آزمایش سریع without the origin term on first use |
@@ -175,6 +177,7 @@ parentheses on first use. Prefer these conventions consistently across lessons:
 | video memory | video memory (حافظهٔ ویدیویی) | حافظهٔ ویدیویی without the origin term on first use |
 | parallel computing platform | parallel computing platform (سکوی محاسبات موازی) | سکوی محاسبات موازی without the origin term |
 | half precision | half precision (دقت نیمه) | دقت نیمه without the origin term on first use |
+| asynchronous | asynchronous (ناهمگام) | ناهمگام without the origin term on first use |
 | command | command (فرمان) | فرمان when the command itself is the subject being taught |
 | flag | flag (پرچم) | پرچم without the origin term on first use |
 | switch | switch (سوئیچ) | سوئیچ without the origin term on first use |
@@ -249,9 +252,10 @@ check. At minimum:
    all rewritten by `site/build.js`.
 
 To see the page rather than the Markdown, follow the preview steps in
-[site-integration.md](references/site-integration.md). Serve the repository root
-(not `site/`) and `lesson.html` reads your working tree directly, so no commit is
-needed to review your own rendering.
+[site-integration.md](references/site-integration.md). Run
+`python3 scripts/serve_site.py` so the landing page is at `/` and
+`lesson.html` reads the working tree from `/phases/`; no commit is needed to
+review your own rendering.
 
 Report the target language, translated files, validation performed, whether the
 interface strings were localized or left English, and any source ambiguity. Do
