@@ -4,13 +4,11 @@ Use this checklist for every translated lesson.
 
 ## Structural parity
 
-- Keep exactly one top-level title, and make it the lesson title — the site
-  reads it as the localized name for the sidebar, catalog, and search.
-- After `node site/build.js`, verify the metadata split: the lesson's top-level
-  `name` remains the English title from `docs/en.md`, while
-  `i18n.<language-code>.name` equals the first H1 from
-  `docs/<language-code>.md`. Never hand-edit `site/data.js` to change this
-  generated distinction.
+- Keep exactly one top-level title, and make it the lesson title. For Persian,
+  copy the English `docs/en.md` H1 exactly; do not translate the title.
+- After `node site/build.js`, verify that a Persian lesson's top-level `name`,
+  `i18n.fa.name`, and first H1 all equal the English title from `docs/en.md`.
+  Never hand-edit `site/data.js` to change this generated metadata.
 - Keep the leading `> blockquote` motto; it becomes the lesson's summary and
   meta description. Stay under 180 characters or it is truncated.
 - Preserve heading order and levels.

@@ -43,6 +43,9 @@ Consequences:
 - **Exactly one `# H1`, and it must be the lesson title.** A translated lesson
   whose first `#` line is something else will show that text as its title
   everywhere on the site.
+- **Persian source-title policy:** copy the English `docs/en.md` H1 exactly into
+  `docs/fa.md`; do not translate it. Consequently, `i18n.fa.name` intentionally
+  remains the same as the canonical English lesson name.
 - **Keep the leading `> blockquote`.** Drop it and the lesson loses its summary
   in search and its social preview text. It is truncated at 180 characters, so
   keep the motto short.

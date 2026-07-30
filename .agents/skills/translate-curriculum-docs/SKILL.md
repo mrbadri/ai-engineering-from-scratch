@@ -52,7 +52,7 @@ sequence, claims, distinctions, examples, tone, and level of detail.
 
 Translate:
 
-- titles, hooks, headings, paragraphs, lists, tables, callouts, captions, and
+- hooks, headings, paragraphs, lists, tables, callouts, captions, and
   human-readable Mermaid labels
 - the values of `Type`, `Prerequisites`, and `Time` when a natural localized
   form is useful
@@ -74,12 +74,12 @@ Keep unchanged:
   full-width numerals, even where that is conventional prose style
 - image paths and Mermaid structure, identifiers, directives, and syntax
 
-The first `# H1` in `docs/<language-code>.md` is the localized lesson title.
-Keep exactly one title there and translate it independently from the English
-`docs/en.md` title. `site/data.js` intentionally keeps the canonical English
-title in the lesson's top-level `name` field and stores the localized title in
-`i18n.<language-code>.name`; never hand-edit `site/data.js` or replace the
-canonical English field with a translation.
+The first `# H1` in a Persian `docs/fa.md` must be copied exactly from the
+English `docs/en.md` title. Do not translate or paraphrase it. Keep exactly one
+title there so the canonical developer-facing title remains searchable and
+stable. `site/data.js` will therefore intentionally contain the same English
+title in both the lesson's top-level `name` field and `i18n.fa.name`; never
+hand-edit `site/data.js`.
 
 Use the target language naturally rather than mirroring English word order.
 On first use of a specialized term, prefer the globally conventional developer
@@ -232,8 +232,8 @@ check. At minimum:
    were not altered accidentally.
 4. Confirm the lesson-contract fields remain present and `Languages` still
    matches the source.
-5. Confirm exactly one `# H1` and one leading `> blockquote` — the site uses
-   them as the localized lesson title and summary.
+5. Confirm exactly one `# H1` and one leading `> blockquote`; for Persian,
+   confirm the H1 is byte-for-byte identical to the English source title.
 6. Search for untranslated prose, placeholder text, translation notes, and
    accidental additions.
 7. For a translated quiz, confirm `stage`, `correct`, and the option order and
@@ -243,8 +243,9 @@ check. At minimum:
    `site/data.js`; confirm the run reports your language under
    "Translated lessons" and "Translated quizzes" with the counts you expect, and
    that it printed no ⚠️ quiz-mismatch warnings. For each translated lesson,
-   verify that top-level `name` still matches `docs/en.md` while
-   `i18n.<language-code>.name` matches the first H1 in the translated file.
+   verify that top-level `name` and `i18n.fa.name` both match the English H1
+   for Persian translations, and that the translated file contains that same
+   source title.
 9. Run `python3 scripts/audit_lessons.py` after repository changes.
 10. Review `git diff --check` and the final diff. Never hand-edit generated
    files — `site/data.js`, `site/sitemap.xml`, `site/llms.txt`,
