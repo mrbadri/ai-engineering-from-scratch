@@ -1873,7 +1873,12 @@
       var currentPhaseIndex = -1;
       var currentLessonIndex = -1;
       var flatLessons = [];
-      var REPO_TREE = 'https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/';
+      var DEFAULT_REPO_SLUG = 'rohitg00/ai-engineering-from-scratch';
+      var REPO_SLUG = (typeof window !== 'undefined' &&
+        /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(window.__AIFS_REPO || ''))
+        ? window.__AIFS_REPO : DEFAULT_REPO_SLUG;
+      var REPO_REF = (typeof window !== 'undefined' && window.__AIFS_REF) ? window.__AIFS_REF : 'main';
+      var REPO_TREE = 'https://github.com/' + REPO_SLUG + '/tree/' + REPO_REF + '/';
 
       // Declared here, above the fetchLesson() call below, on purpose. As a
       // `var` further down the file the declaration hoists but the `= null`
@@ -2062,8 +2067,8 @@
        * configuration either way.
        */
       function repoFileUrls(relPath) {
-        var ref = (typeof window !== 'undefined' && window.__AIFS_REF) ? window.__AIFS_REF : 'main';
-        var remote = 'https://raw.githubusercontent.com/rohitg00/ai-engineering-from-scratch/' +
+        var ref = REPO_REF;
+        var remote = 'https://raw.githubusercontent.com/' + REPO_SLUG + '/' +
           ref + '/' + relPath;
         if (!isLocalPreview()) return [remote];
         try {
@@ -3433,7 +3438,7 @@
           cb(null, ghApiCache[apiPath]);
           return;
         }
-        fetch('https://api.github.com/repos/rohitg00/ai-engineering-from-scratch/contents/' + apiPath, {
+        fetch('https://api.github.com/repos/' + REPO_SLUG + '/contents/' + apiPath, {
           headers: { 'Accept': 'application/vnd.github.v3+json' }
         }).then(function (res) {
           if (!res.ok) throw new Error(res.status);
@@ -3510,7 +3515,7 @@
               installHint = tr('panel.installPrompt');
             } else if (type === 'skill') {
               var skillName = file.name.replace(/\.md$/, '').replace(/^skill-/, '');
-              installHint = 'npx skills add rohitg00/ai-engineering-from-scratch --skill ' + skillName;
+              installHint = 'npx skills add ' + REPO_SLUG + ' --skill ' + skillName;
             }
 
             html += '<div class="output-card">';
